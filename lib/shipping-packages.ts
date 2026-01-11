@@ -10,7 +10,7 @@ interface ProductDimensions {
   name?: string
 }
 
-interface Package {
+export interface Package {
   packageNumber: number
   items: Array<{
     productId: string
