@@ -677,10 +677,10 @@ export default function CheckoutPage() {
             Pagamenti non configurati
           </h2>
           <p className="text-yellow-800 mb-4">
-            Stripe non è ancora configurato. Contatta l'amministratore.
+            Stripe non è ancora configurato. Contatta l&apos;amministratore.
           </p>
           <p className="text-sm text-yellow-700">
-            Per completare l'ordine, l'amministratore deve configurare Stripe nella sezione Admin.
+            Per completare l&apos;ordine, l&apos;amministratore deve configurare Stripe nella sezione Admin.
           </p>
         </div>
       </div>
@@ -928,7 +928,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="text-xs text-gray-500 text-center">
-              Cliccando "Paga Ora" verrai reindirizzato al pagamento sicuro con Stripe
+              Cliccando &quot;Paga Ora&quot; verrai reindirizzato al pagamento sicuro con Stripe
             </div>
           </div>
         </div>
