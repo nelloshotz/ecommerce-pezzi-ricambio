@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -68,7 +68,8 @@ export default function Header() {
         }
       }
     }
-  }, [user?.id]) // Solo user?.id come dipendenza per evitare re-render infiniti
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]) // Solo user?.id come dipendenza - clearCart e loadCartFromDB sono funzioni stabili dello store
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">

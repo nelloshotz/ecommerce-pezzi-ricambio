@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { FiStar, FiCheckCircle, FiX } from 'react-icons/fi'
 
@@ -22,7 +22,7 @@ interface ReviewFormProps {
 }
 
 const subjectLabels: Record<string, string> = {
-  PROBLEMA_ORDINE: 'Problema con l\'ordine',
+  PROBLEMA_ORDINE: 'Problema con l&apos;ordine',
   PARTI_MANCANTI: 'Parti mancanti',
   ALTRO: 'Altro',
 }
@@ -39,15 +39,7 @@ export default function ReviewForm({ orderId, orderStatus, onReviewSubmit }: Rev
   const [comment, setComment] = useState('')
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    if (user && orderStatus === 'DELIVERED') {
-      loadReview()
-    } else {
-      setLoading(false)
-    }
-  }, [orderId, user, orderStatus])
-
-  const loadReview = async () => {
+  const loadReview = useCallback(async () => {
     try {
       const response = await fetch(`/api/orders/${orderId}/reviews`)
       if (response.ok) {
@@ -64,7 +56,15 @@ export default function ReviewForm({ orderId, orderStatus, onReviewSubmit }: Rev
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId])
+
+  useEffect(() => {
+    if (user && orderStatus === 'DELIVERED') {
+      loadReview()
+    } else {
+      setLoading(false)
+    }
+  }, [user, orderStatus, loadReview])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

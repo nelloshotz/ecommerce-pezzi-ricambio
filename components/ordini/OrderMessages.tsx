@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { FiMessageCircle, FiSend, FiImage, FiX, FiUser, FiShield } from 'react-icons/fi'
 import Image from 'next/image'
@@ -44,7 +44,7 @@ interface OrderMessagesProps {
 }
 
 const SUBJECT_OPTIONS = [
-  { value: 'PROBLEMA_ORDINE', label: 'Problema con l\'ordine' },
+  { value: 'PROBLEMA_ORDINE', label: 'Problema con l&apos;ordine' },
   { value: 'PARTI_MANCANTI', label: 'Parti mancanti' },
   { value: 'ALTRO', label: 'Altro' },
 ]
@@ -68,7 +68,7 @@ export default function OrderMessages({ orderId, orderStatus }: OrderMessagesPro
     if (user) {
       loadMessages()
     }
-  }, [orderId, user])
+  }, [user, loadMessages])
 
   useEffect(() => {
     scrollToBottom()
@@ -78,7 +78,7 @@ export default function OrderMessages({ orderId, orderStatus }: OrderMessagesPro
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     if (!user) return
 
     try {
@@ -102,7 +102,7 @@ export default function OrderMessages({ orderId, orderStatus }: OrderMessagesPro
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId, user, isAdmin])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
