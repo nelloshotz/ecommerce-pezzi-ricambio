@@ -139,7 +139,7 @@ export default function AdminFooterPage() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">Chi Siamo</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Questo testo verrà visualizzato nella pagina "Chi Siamo" accessibile dal footer.
+            Questo testo verrà visualizzato nella pagina &quot;Chi Siamo&quot; accessibile dal footer.
           </p>
           <textarea
             value={chiSiamo}
@@ -154,7 +154,7 @@ export default function AdminFooterPage() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">Spedizioni</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Questo testo verrà visualizzato nella pagina "Spedizioni" accessibile dal footer.
+            Questo testo verrà visualizzato nella pagina &quot;Spedizioni&quot; accessibile dal footer.
           </p>
           <textarea
             value={spedizioni}
@@ -186,7 +186,7 @@ export default function AdminFooterPage() {
 
           {faq.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
-              Nessuna FAQ aggiunta. Clicca su "Aggiungi FAQ" per iniziare.
+              Nessuna FAQ aggiunta. Clicca su &quot;Aggiungi FAQ&quot; per iniziare.
             </p>
           ) : (
             <div className="space-y-4">

@@ -386,7 +386,7 @@ export default function AdminOrdineDettaglioPage() {
                   />
                   {formData.trackingNumber && (
                     <p className="text-xs text-blue-600">
-                      Inserendo un tracking, lo stato verrà aggiornato a "Spedito"
+                      Inserendo un tracking, lo stato verrà aggiornato a &quot;Spedito&quot;
                     </p>
                   )}
                 </div>

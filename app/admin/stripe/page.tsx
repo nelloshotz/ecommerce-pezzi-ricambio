@@ -215,10 +215,10 @@ export default function AdminStripePage() {
           <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1 ml-2">
             <li>Registrati su <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" className="underline">stripe.com</a></li>
             <li>Accedi al Dashboard Stripe</li>
-            <li>Vai in "Developers" → "API keys"</li>
+            <li>Vai in &quot;Developers&quot; → &quot;API keys&quot;</li>
             <li>Copia la <strong>Publishable key</strong> (inizia con pk_test_ o pk_live_)</li>
             <li>Copia la <strong>Secret key</strong> (inizia con sk_test_ o sk_live_)</li>
-            <li>Per webhook, vai in "Developers" → "Webhooks" e copia il "Signing secret"</li>
+            <li>Per webhook, vai in &quot;Developers&quot; → &quot;Webhooks&quot; e copia il &quot;Signing secret&quot;</li>
           </ol>
         </div>
 
@@ -400,13 +400,13 @@ export default function AdminStripePage() {
             Per ricevere notifiche automatiche sui pagamenti, configura un webhook su Stripe:
           </p>
           <ol className="list-decimal list-inside space-y-2 ml-2">
-            <li>Vai nel Dashboard Stripe → "Developers" → "Webhooks"</li>
-            <li>Clicca "Add endpoint"</li>
+            <li>Vai nel Dashboard Stripe → &quot;Developers&quot; → &quot;Webhooks&quot;</li>
+            <li>Clicca &quot;Add endpoint&quot;</li>
             <li>
               Endpoint URL: <code className="bg-gray-100 px-2 py-1 rounded">https://tuodominio.com/api/webhooks/stripe</code>
             </li>
             <li>Seleziona gli eventi: <code className="bg-gray-100 px-2 py-1 rounded">payment_intent.succeeded</code> e <code className="bg-gray-100 px-2 py-1 rounded">payment_intent.payment_failed</code></li>
-            <li>Copia il "Signing secret" e inseriscilo nel campo Webhook Secret sopra</li>
+            <li>Copia il &quot;Signing secret&quot; e inseriscilo nel campo Webhook Secret sopra</li>
           </ol>
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-yellow-800 text-xs">

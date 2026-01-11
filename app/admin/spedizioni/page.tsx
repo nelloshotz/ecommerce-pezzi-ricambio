@@ -250,7 +250,7 @@ export default function AdminShippingPage() {
                       <li><strong>Calcolo automatico:</strong> Se tutti i prodotti hanno dimensioni (altezza, larghezza, profondità) e peso, il costo viene calcolato automaticamente in base a peso, dimensioni e corriere</li>
                       <li><strong>Prezzo fisso:</strong> Se anche solo un prodotto non ha dimensioni o peso, viene applicato il prezzo fisso (se impostato)</li>
                       <li><strong>Percentuale ricarico:</strong> Viene applicata solo al calcolo automatico (non al prezzo fisso)</li>
-                      <li><strong>Spedizione gratuita:</strong> Se l'ordine raggiunge la soglia impostata, la spedizione è gratuita (€0.00)</li>
+                      <li><strong>Spedizione gratuita:</strong> Se l&apos;ordine raggiunge la soglia impostata, la spedizione è gratuita (€0.00)</li>
                     </ul>
                   </div>
                 </div>

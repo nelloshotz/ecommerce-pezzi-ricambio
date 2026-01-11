@@ -251,7 +251,7 @@ export default function CarrelloPage() {
                         }}
                       />
                       <p className="text-xs text-orange-600 mt-1 font-medium">
-                        ⚠️ Completa l'ordine entro 20 minuti o il prodotto verrà rimosso dal carrello
+                        ⚠️ Completa l&apos;ordine entro 20 minuti o il prodotto verrà rimosso dal carrello
                       </p>
                     </div>
                   )}
@@ -370,7 +370,7 @@ export default function CarrelloPage() {
             {itemsWithReservation.length > 0 && !hasExpiredReservations && (
               <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-sm text-yellow-800">
-                  ⚠️ Alcuni prodotti hanno una prenotazione temporanea. Completa l'ordine entro 20 minuti dalla loro aggiunta al carrello.
+                  ⚠️ Alcuni prodotti hanno una prenotazione temporanea. Completa l&apos;ordine entro 20 minuti dalla loro aggiunta al carrello.
                 </p>
               </div>
             )}
