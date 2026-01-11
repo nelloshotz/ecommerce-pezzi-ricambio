@@ -260,14 +260,14 @@ export default function CarrelloPage() {
                 <div className="flex flex-col justify-between items-end">
                   <div className="flex items-center space-x-3 mb-4">
                     <button
-                      onClick={() => updateQuantity(item.product.id, item.quantity - 1, user?.id)}
+                      onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                       className="p-1 border rounded hover:bg-gray-100"
                     >
                       <FiMinus className="w-4 h-4" />
                     </button>
                     <span className="font-semibold w-8 text-center">{item.quantity}</span>
                     <button
-                      onClick={() => updateQuantity(item.product.id, item.quantity + 1, user?.id)}
+                      onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                       className="p-1 border rounded hover:bg-gray-100"
                     >
                       <FiPlus className="w-4 h-4" />

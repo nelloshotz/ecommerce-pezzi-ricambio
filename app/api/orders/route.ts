@@ -134,7 +134,14 @@ export async function POST(request: NextRequest) {
 
     // Verifica disponibilità prodotti e calcola totale
     // Verifica anche che le prenotazioni siano ancora valide per prodotti con 1 solo pezzo
-    const orderItems = []
+    const orderItems: Array<{
+      productId: string
+      quantity: number
+      price: number
+      total: number
+      productName: string
+      productSku?: string | null
+    }> = []
     let calculatedSubtotal = 0
     const now = new Date()
 

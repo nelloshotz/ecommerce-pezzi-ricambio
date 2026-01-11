@@ -6,9 +6,9 @@ interface CartStore {
   items: CartItem[]
   isLoading: boolean
   addItem: (product: Product, quantity?: number) => Promise<void>
-  removeItem: (productId: string) => Promise<void>
-  updateQuantity: (productId: string, quantity: number) => Promise<void>
-  clearCart: () => Promise<void>
+  removeItem: (productId: string, userId?: string) => Promise<void>
+  updateQuantity: (productId: string, quantity: number, userId?: string) => Promise<void>
+  clearCart: (userId?: string) => Promise<void>
   syncCartFromDB: (userId: string) => Promise<void>
   loadCartFromDB: (userId: string) => Promise<void>
   getTotal: () => number
