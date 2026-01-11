@@ -69,7 +69,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           <div className="bg-red-50 border-2 border-red-500 rounded-lg p-6">
             <h1 className="text-2xl font-bold text-red-900 mb-4">Errore nel caricamento</h1>
             <p className="text-red-800 mb-4">
-              Si è verificato un errore durante il caricamento della pagina. L'errore è stato registrato nel file di log.
+              Si è verificato un errore durante il caricamento della pagina. L&apos;errore è stato registrato nel file di log.
             </p>
             {this.state.error && (
               <details className="mt-4">
