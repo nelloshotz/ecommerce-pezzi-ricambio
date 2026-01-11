@@ -5,7 +5,7 @@ import { CartItem, Product } from '@/types'
 interface CartStore {
   items: CartItem[]
   isLoading: boolean
-  addItem: (product: Product, quantity?: number) => Promise<void>
+  addItem: (product: Product, quantity?: number, userId?: string) => Promise<void>
   removeItem: (productId: string, userId?: string) => Promise<void>
   updateQuantity: (productId: string, quantity: number, userId?: string) => Promise<void>
   clearCart: (userId?: string) => Promise<void>

@@ -40,10 +40,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
-    // Ottieni userId se disponibile (per sincronizzare con DB)
-    const authStore = useAuthStore.getState()
-    const userId = authStore.user?.id
-    await addItem(product, 1, userId)
+    await addItem(product, 1)
   }
 
   return (
