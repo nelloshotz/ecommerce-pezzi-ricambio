@@ -93,7 +93,7 @@ export default function AdminCouponPage() {
       // Ricarica lista coupon
       const couponsResponse = await fetch('/api/admin/coupons', {
         headers: {
-          'x-user-id': user.id || '',
+          'x-user-id': user?.id || '',
         },
       })
       if (couponsResponse.ok) {
