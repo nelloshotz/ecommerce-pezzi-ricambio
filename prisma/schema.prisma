@@ -1,0 +1,536 @@
+// Schema database MotorPlanet
+// Database SQLite per iniziare (facilmente migrabile a PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Tabella Utenti
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         String    @default("CUSTOMER") // CUSTOMER o ADMIN (SQLite non supporta enum)
+  userType     String    @default("PRIVATE") // PRIVATE o COMPANY
+  // Campi Azienda (se userType === "COMPANY")
+  companyName      String? // Ragione sociale (obbligatorio se azienda)
+  companyAddress   String? // Indirizzo azienda (obbligatorio se azienda)
+  companyTaxCode   String? // Codice fiscale o partita IVA (obbligatorio se azienda)
+  companyPec       String? // PEC (opzionale)
+  banned       Boolean   @default(false) // Se true, l'utente è bannato
+  bannedAt     DateTime? // Data ban
+  bannedBy     String? // ID admin che ha bannato l'utente
+  bannedReason String? // Motivo del ban
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relazioni
+  addresses       Address[]
+  orders          Order[]
+  cartItems       CartItem[]
+  sessions        Session[]
+  reviews         Review[]
+  messagesAsUser  OrderMessage[] @relation("UserMessages")
+  messagesAsAdmin OrderMessage[] @relation("AdminMessages")
+
+  @@index([email])
+  @@index([banned])
+  @@index([userType])
+  @@map("users")
+}
+
+// Tabella Indirizzi (spedizione e fatturazione)
+model Address {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String   @default("SHIPPING") // SHIPPING o BILLING (SQLite non supporta enum)
+  firstName  String
+  lastName   String
+  email      String
+  phone      String
+  address    String
+  city       String
+  postalCode String
+  province   String?
+  country    String   @default("Italia")
+  isDefault  Boolean  @default(false) // Indirizzo di default per tipo
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relazioni
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shippingOrders Order[] @relation("ShippingAddress")
+  billingOrders  Order[] @relation("BillingAddress")
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// Tabella Categorie
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  image       String?
+  order       Int      @default(0) // Ordine visualizzazione
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relazioni
+  products     Product[]
+  productTypes ProductType[]
+
+  @@map("categories")
+}
+
+// Tabella Tipi Prodotto (configurazione)
+model ProductType {
+  id         String   @id @default(cuid())
+  name       String   @unique // Es. "Olio Motore", "Batteria"
+  slug       String   @unique
+  categoryId String
+  config     String // JSON con configurazione campi dinamici (SQLite non supporta @db.Text)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relazioni
+  category Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@index([categoryId])
+  @@map("product_types")
+}
+
+// Tabella Prodotti
+model Product {
+  id                String   @id @default(cuid())
+  name              String
+  slug              String   @unique
+  description       String // SQLite non supporta @db.Text
+  price             Float
+  vatRate           Float? // Aliquota IVA in percentuale (es. 22 per 22%)
+  image             String
+  technicalSheet    String? // URL o path del file scheda tecnica (PDF)
+  categoryId        String
+  productTypeId     String?
+  brand             String?
+  partNumber        String?
+  compatibility     String? // Marchi auto/moto compatibili (es. "AUDI, BMW, MERCEDES")
+  sku               String?  @unique // Stock Keeping Unit
+  stockQuantity     Int      @default(0)
+  reservedQuantity  Int      @default(0) // Quantità riservata nel carrello
+  lowStockThreshold Int? // Soglia per reminder stock basso (quando stockQuantity <= lowStockThreshold)
+  inStock           Boolean  @default(false)
+  active            Boolean  @default(true)
+  featured          Boolean  @default(false) // Prodotto in evidenza per la homepage
+  customFields      String? // JSON con campi dinamici del tipo prodotto
+  metadata          String? // JSON per dati aggiuntivi
+  // Dimensioni e peso per calcolo spedizione
+  height            Float? // Altezza in cm
+  width             Float? // Larghezza in cm
+  depth             Float? // Profondità in cm
+  weight            Float? // Peso in kg
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relazioni
+  category    Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  offers      ProductOffer[] // Offerte promozionali
+  productType ProductType?   @relation(fields: [productTypeId], references: [id], onDelete: SetNull)
+  orderItems  OrderItem[]
+  cartItems   CartItem[]
+  images      ProductImage[]
+
+  @@index([categoryId])
+  @@index([productTypeId])
+  @@index([active, inStock])
+  @@index([slug])
+  @@map("products")
+}
+
+// Tabella Immagini Prodotti (supporto multiple immagini)
+model ProductImage {
+  id           String   @id @default(cuid())
+  productId    String
+  imageUrl     String // URL immagine originale
+  thumbnailUrl String? // URL thumbnail (se generato)
+  webpUrl      String? // URL versione WebP (se convertita)
+  width        Int? // Larghezza originale
+  height       Int? // Altezza originale
+  fileSize     Int? // Dimensione file in bytes
+  isPrimary    Boolean  @default(false) // Se è l'immagine principale
+  sortOrder    Int      @default(0) // Ordine visualizzazione
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([isPrimary])
+  @@map("product_images")
+}
+
+// Tabella Ordini
+model Order {
+  id                    String    @id @default(cuid())
+  orderNumber           String    @unique // Numero ordine formato: ORD-YYYYMMDD-XXXX
+  userId                String
+  status                String    @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, DELAYED, CANCELLED, REFUNDED (SQLite non supporta enum)
+  subtotal              Float
+  discountAmount        Float     @default(0) // Importo sconto applicato (da coupon)
+  discountPercent       Float? // Percentuale sconto applicata (da coupon)
+  couponCode            String? // Codice coupon utilizzato
+  couponId              String? // ID coupon utilizzato
+  shippingCost          Float     @default(0)
+  isFreeShipping        Boolean   @default(false) // Se true, spedizione gratuita (soglia raggiunta)
+  shippingCarrier       String? // Nome corriere: "GLS", "BRT", "Poste Italiane"
+  shippingBaseCost      Float? // Costo base spedizione (senza ricarico)
+  shippingMarkupPercent Float? // Percentuale ricarico applicata
+  shippingPackages      String? // JSON con info sui colli: [{packageNumber, items: [{productId, quantity}], weight, dimensions, cost}]
+  tax                   Float     @default(0)
+  total                 Float
+  paymentMethod         String?
+  paymentStatus         String    @default("PENDING") // PENDING, PAID, FAILED, REFUNDED, PARTIALLY_REFUNDED (SQLite non supporta enum)
+  paymentId             String? // ID pagamento esterno (Stripe, PayPal, etc.)
+  stripePaymentIntentId String? // ID Payment Intent Stripe
+  stripeClientSecret    String? // Client secret per completare pagamento (temporaneo)
+  shippingAddressId     String
+  billingAddressId      String
+  notes                 String? // SQLite non supporta @db.Text
+  trackingNumber        String?
+  shippedAt             DateTime? // Data spedizione (quando viene inserito tracking)
+  deliveredAt           DateTime? // Data consegna (quando viene confermato "arrivato")
+  confirmedAt           DateTime? // Data conferma ordine (quando viene pagato)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relazioni
+  user            User           @relation(fields: [userId], references: [id])
+  shippingAddress Address        @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddress  Address        @relation("BillingAddress", fields: [billingAddressId], references: [id])
+  items           OrderItem[]
+  review          Review?
+  messages        OrderMessage[]
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([createdAt])
+  @@index([couponId])
+  @@map("orders")
+}
+
+// Tabella Articoli Ordine (prodotti nell'ordine)
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  productId   String
+  quantity    Int
+  price       Float // Prezzo al momento dell'ordine (storico)
+  total       Float // quantity * price
+  productName String // Nome prodotto al momento dell'ordine (storico)
+  productSku  String? // SKU prodotto al momento dell'ordine (storico)
+  createdAt   DateTime @default(now())
+
+  // Relazioni
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// Tabella Carrello (opzionale - potrebbe essere solo localStorage)
+// Qui la manteniamo per avere statistiche e recuperare carrelli abbandonati
+model CartItem {
+  id                   String    @id @default(cuid())
+  userId               String
+  productId            String
+  quantity             Int
+  price                Float?    // Prezzo effettivo pagato (con IVA e sconto se presente) al momento dell'aggiunta
+  reservationExpiresAt DateTime? // Data scadenza prenotazione (per prodotti con 1 solo pezzo, 20 minuti)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // Relazioni
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId]) // Un utente può avere un solo record per prodotto
+  @@index([userId])
+  @@index([reservationExpiresAt]) // Per trovare rapidamente prenotazioni scadute
+  @@map("cart_items")
+}
+
+// Tabella Vendite (storico vendite per statistiche)
+model Sale {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  userId    String
+  quantity  Int
+  price     Float
+  total     Float
+  date      DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([userId])
+  @@index([date])
+  @@map("sales")
+}
+
+// Tabella Inventario (movimenti stock per tracciabilità)
+model InventoryMovement {
+  id            String   @id @default(cuid())
+  productId     String
+  type          String // PURCHASE, SALE, ADJUSTMENT, RETURN, DAMAGE (SQLite non supporta enum)
+  quantity      Int // Positivo per acquisti, negativo per vendite
+  quantityAfter Int // Quantità dopo il movimento
+  reason        String? // Motivo del movimento
+  orderId       String? // Se collegato a un ordine
+  userId        String? // Utente/admin che ha fatto il movimento
+  createdAt     DateTime @default(now())
+
+  @@index([productId])
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("inventory_movements")
+}
+
+// Tabella Sessioni (per gestire sessioni utente)
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  // Relazioni
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// Tabella Log (per audit trail)
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, etc.
+  entityType String // USER, PRODUCT, ORDER, etc.
+  entityId   String?
+  changes    String? // JSON con i cambiamenti
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// Tabella Recensioni Ordine
+model Review {
+  id        String   @id @default(cuid())
+  orderId   String   @unique // Una recensione per ordine
+  userId    String
+  rating    Int // Da 1 a 5
+  title     String?
+  comment   String? // Commento recensione
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relazioni
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([rating])
+  @@map("reviews")
+}
+
+// Tabella Messaggi Ordine (messaggistica interna)
+model OrderMessage {
+  id            String   @id @default(cuid())
+  orderId       String
+  userId        String? // Null se messaggio admin
+  adminId       String? // Null se messaggio utente
+  subject       String // Motivo/oggetto: "PROBLEMA_ORDINE", "PARTI_MANCANTI", "ALTRO"
+  message       String // Testo del messaggio
+  isRead        Boolean  @default(false)
+  isReadByUser  Boolean  @default(false) // Se letto dall'utente
+  isReadByAdmin Boolean  @default(false) // Se letto dall'admin
+  createdAt     DateTime @default(now())
+
+  // Relazioni
+  order       Order                    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user        User?                    @relation("UserMessages", fields: [userId], references: [id], onDelete: SetNull)
+  admin       User?                    @relation("AdminMessages", fields: [adminId], references: [id], onDelete: SetNull)
+  attachments OrderMessageAttachment[]
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([adminId])
+  @@index([createdAt])
+  @@index([isRead])
+  @@map("order_messages")
+}
+
+// Tabella Allegati Messaggi
+model OrderMessageAttachment {
+  id        String   @id @default(cuid())
+  messageId String
+  fileName  String
+  fileUrl   String // URL del file salvato
+  fileType  String // MIME type (image/jpeg, image/png, etc.)
+  fileSize  Int // Dimensione in bytes
+  createdAt DateTime @default(now())
+
+  // Relazioni
+  message OrderMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("order_message_attachments")
+}
+
+// Tabella Configurazione Stripe (credentiali pagamento)
+model StripeConfig {
+  id             String   @id @default(cuid())
+  publishableKey String? // Publishable key (pk_test_... o pk_live_...)
+  secretKey      String? // Secret key (sk_test_... o sk_live_...) - criptata
+  webhookSecret  String? // Webhook secret per verificare eventi Stripe
+  isTestMode     Boolean  @default(true) // true = test mode, false = live mode
+  isActive       Boolean  @default(false) // Se la configurazione è attiva
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("stripe_config")
+}
+
+// Tabella Impostazioni Spedizione (percentuale ricarico e soglia spedizione gratuita)
+model ShippingSettings {
+  id                    String   @id @default(cuid())
+  markupPercent         Float    @default(0) // Percentuale ricarico su costo base spedizione (es. 10 = 10%)
+  freeShippingThreshold Float? // Importo minimo per spedizione gratuita (null = non attivo)
+  fixedShippingPrice    Float? // Prezzo fisso spedizione quando prodotti non hanno dimensioni/peso (null = non attivo)
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("shipping_settings")
+}
+
+// Configurazione Corrieri (GLS, BRT, Poste Italiane)
+model CarrierConfig {
+  id        String   @id @default(cuid())
+  config    String   // JSON con configurazione completa corrieri
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("carrier_configs")
+}
+
+// Tabella Dati Azienda/Admin (per etichette spedizione)
+model CompanySettings {
+  id          String   @id @default(cuid())
+  companyName String // Nome azienda
+  vatNumber   String? // Partita IVA
+  taxCode     String? // Codice Fiscale
+  address     String // Indirizzo sede
+  city        String
+  postalCode  String
+  province    String?
+  country     String   @default("Italia")
+  phone       String
+  email       String
+  website     String?
+  notes       String? // Note aggiuntive per etichette
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("company_settings")
+}
+
+// Tabella Impostazioni Inventario/Stock
+model InventorySettings {
+  id                     String   @id @default(cuid())
+  lowStockThreshold      Int      @default(10) // Soglia scorte basse (default: 10 pezzi)
+  criticalStockThreshold Int      @default(5) // Soglia scorte critiche (default: 5 pezzi)
+  enableLowStockAlerts   Boolean  @default(true) // Abilita alert scorte basse
+  enableStockPredictions Boolean  @default(true) // Abilita previsioni esaurimento
+  notificationEmail      String? // Email per notifiche admin (null = usa email company)
+  daysForSalesAverage    Int      @default(30) // Giorni per calcolo media vendite (default: 30)
+  isActive               Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@map("inventory_settings")
+}
+
+// Tabella Coupon Sconti
+model Coupon {
+  id              String    @id @default(cuid())
+  code            String    @unique // Codice coupon alfanumerico a 6 cifre
+  discountPercent Float // Percentuale sconto (es. 10 = 10%)
+  isUsed          Boolean   @default(false) // Se true, il coupon è stato utilizzato
+  usedAt          DateTime? // Data utilizzo
+  usedByOrderId   String? // ID ordine che ha utilizzato il coupon
+  usedByUserId    String? // ID utente che ha utilizzato il coupon
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([code])
+  @@index([isUsed])
+  @@map("coupons")
+}
+
+// Contenuto Footer (Chi Siamo, Spedizioni, FAQ)
+model FooterContent {
+  id          String   @id @default(cuid())
+  chiSiamo    String? // Testo sezione "Chi Siamo"
+  spedizioni  String? // Testo sezione "Spedizioni"
+  faq         String? // JSON array: [{domanda: string, risposta: string}]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("footer_content")
+}
+
+// Offerte Promozionali Prodotto
+model ProductOffer {
+  id          String   @id @default(cuid())
+  productId   String
+  discountPercent Float // Percentuale di sconto (es. 20 per 20%)
+  startDate   DateTime @default(now()) // Data inizio offerta
+  endDate     DateTime // Data fine offerta
+  isActive    Boolean  @default(true) // Se false, offerta disattivata manualmente
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relazioni
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([endDate])
+  @@index([isActive])
+  @@map("product_offers")
+}

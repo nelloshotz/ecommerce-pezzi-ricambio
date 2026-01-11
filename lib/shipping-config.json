@@ -1,0 +1,64 @@
+{
+  "poste_italiane": {
+    "italia": {
+      "peso_max_kg": 20,
+      "formati": {
+        "standard": {
+          "dimensioni": {
+            "lato_max_cm": 100,
+            "somma_lati_cm": 200
+          },
+          "prezzi_eur": [
+            { "max_kg": 3, "prezzo": 10.30 },
+            { "max_kg": 5, "prezzo": 12.20 },
+            { "max_kg": 10, "prezzo": 14.30 },
+            { "max_kg": 20, "prezzo": 18.30 }
+          ]
+        },
+        "non_standard": {
+          "dimensioni": {
+            "lato_max_cm": 150,
+            "somma_lati_cm": 300
+          },
+          "prezzi_eur": [
+            { "max_kg": 3, "prezzo": 15.30 },
+            { "max_kg": 5, "prezzo": 17.20 },
+            { "max_kg": 10, "prezzo": 19.30 },
+            { "max_kg": 20, "prezzo": 23.30 }
+          ]
+        }
+      }
+    }
+  },
+  "brt": {
+    "italia": {
+      "peso_max_kg": 30,
+      "dimensioni": {
+        "lato_max_cm": 100,
+        "somma_lati_cm": 250
+      },
+      "prezzi_eur": [
+        { "max_kg": 5, "prezzo": 9.00 },
+        { "max_kg": 10, "prezzo": 11.00 },
+        { "max_kg": 20, "prezzo": 14.00 },
+        { "max_kg": 30, "prezzo": 17.00 }
+      ]
+    }
+  },
+  "gls": {
+    "italia": {
+      "peso_max_kg": 30,
+      "dimensioni": {
+        "lato_max_cm": 200,
+        "somma_lati_cm": 300
+      },
+      "prezzi_eur": [
+        { "max_kg": 3, "prezzo": 8.50 },
+        { "max_kg": 10, "prezzo": 10.50 },
+        { "max_kg": 20, "prezzo": 13.00 },
+        { "max_kg": 30, "prezzo": 16.50 }
+      ]
+    }
+  }
+}
+
