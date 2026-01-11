@@ -266,7 +266,7 @@ export default function ModificaCategoriaPage() {
           <p className="font-medium mb-1">Attenzione:</p>
           <p>
             Questa categoria ha {category.productsCount} prodotto/i associato/i. 
-            Non puoi eliminarla finché non sposti tutti i prodotti in un'altra categoria.
+            Non puoi eliminarla finché non sposti tutti i prodotti in un&apos;altra categoria.
           </p>
         </div>
       )}
@@ -408,7 +408,7 @@ export default function ModificaCategoriaPage() {
               <div className="text-xs text-blue-800">
                 <p className="font-medium mb-1">Nota:</p>
                 <p>
-                  Le categorie inattive non vengono mostrate nel catalogo pubblico, ma possono essere utilizzate per organizzare i prodotti nell'admin.
+                  Le categorie inattive non vengono mostrate nel catalogo pubblico, ma possono essere utilizzate per organizzare i prodotti nell&apos;admin.
                 </p>
               </div>
             </div>

@@ -237,7 +237,7 @@ export default function NuovaCategoriaPage() {
               <div className="text-xs text-blue-800">
                 <p className="font-medium mb-1">Nota:</p>
                 <p>
-                  Le categorie inattive non vengono mostrate nel catalogo pubblico, ma possono essere utilizzate per organizzare i prodotti nell'admin.
+                  Le categorie inattive non vengono mostrate nel catalogo pubblico, ma possono essere utilizzate per organizzare i prodotti nell&apos;admin.
                 </p>
               </div>
             </div>

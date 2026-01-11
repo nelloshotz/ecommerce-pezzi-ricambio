@@ -343,7 +343,7 @@ export default function AdminCategoriePage() {
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start space-x-2">
           <FiInfo className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-blue-800">
-            <p className="font-medium mb-1">Nota sull'eliminazione:</p>
+            <p className="font-medium mb-1">Nota sull&apos;eliminazione:</p>
             <p>
               Le categorie con prodotti associati non possono essere eliminate. Prima sposta o elimina i prodotti associati.
             </p>
