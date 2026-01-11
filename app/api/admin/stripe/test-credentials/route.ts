@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     try {
       // Crea istanza Stripe con le credenziali fornite
       const stripe = new Stripe(secretKey, {
-        apiVersion: '2024-12-18.acacia',
+        apiVersion: '2024-12-18.acacia' as any,
       })
 
       // Testa le credenziali facendo una chiamata semplice

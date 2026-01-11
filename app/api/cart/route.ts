@@ -144,10 +144,18 @@ export async function GET(request: NextRequest) {
 
 // POST - Aggiungi/modifica prodotto nel carrello
 export async function POST(request: NextRequest) {
+  let body: any = null
+  let productId: string | undefined = undefined
+  let quantity: number | undefined = undefined
+  let price: number | undefined = undefined
+  let userId: string | null = null
+  
   try {
-    const userId = request.headers.get('x-user-id')
-    const body = await request.json()
-    const { productId, quantity, price } = body
+    userId = request.headers.get('x-user-id')
+    body = await request.json()
+    productId = body.productId
+    quantity = body.quantity
+    price = body.price
 
     await writeLog({
       action: 'POST_CART_REQUEST',
@@ -318,7 +326,7 @@ export async function POST(request: NextRequest) {
       action: 'POST_CART_ERROR',
       error: error.message,
       stack: error.stack,
-      productId: body?.productId,
+      productId: productId || body?.productId,
       userId,
     })
     console.error('Errore nell\'aggiunta al carrello:', error)

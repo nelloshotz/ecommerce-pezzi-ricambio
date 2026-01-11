@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
+// next-auth non è utilizzato, l'autenticazione viene gestita tramite header x-user-id
 
 // GET - Recupera recensione per ordine
 export async function GET(
