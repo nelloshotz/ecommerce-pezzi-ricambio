@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateProductCode } from '@/lib/productCodeGenerator'
-
-import { NextRequest, NextResponse } from 'next/server'
-import { generateProductCode } from '@/lib/productCodeGenerator'
 import { prisma } from '@/lib/prisma'
 
 // POST - Genera codice prodotto automaticamente
