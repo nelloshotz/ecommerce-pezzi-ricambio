@@ -1,7 +1,7 @@
 import sharp from 'sharp'
-import { writeFile, mkdir, unlink, existsSync } from 'fs/promises'
+import { writeFile, mkdir, unlink } from 'fs/promises'
 import { join } from 'path'
-import { existsSync as fsExistsSync } from 'fs'
+import { existsSync } from 'fs'
 
 export interface ProcessedImage {
   originalPath: string
