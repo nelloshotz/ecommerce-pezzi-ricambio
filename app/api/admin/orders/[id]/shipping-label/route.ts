@@ -405,7 +405,7 @@ export async function GET(
       additionalInfo: { bufferSize: finalBuffer.length, orderNumber: order.orderNumber },
     }).catch(() => {})
 
-    return new NextResponse(finalBuffer, {
+    return new NextResponse(new Uint8Array(finalBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="etichetta-spedizione-${order.orderNumber}${packages.length > 1 ? `-collo-${packages[0].packageNumber}` : ''}.pdf"`,

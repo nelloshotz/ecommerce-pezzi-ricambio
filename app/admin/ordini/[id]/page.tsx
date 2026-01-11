@@ -521,9 +521,9 @@ export default function AdminOrdineDettaglioPage() {
             ) : (
               <div className="space-y-2">
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                  order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                  order.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
+                  order.paymentStatus === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                  order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-800' :
+                  order.paymentStatus === 'FAILED' ? 'bg-red-100 text-red-800' :
                   'bg-orange-100 text-orange-800'
                 }`}>
                   {paymentStatusLabels[order.paymentStatus]}

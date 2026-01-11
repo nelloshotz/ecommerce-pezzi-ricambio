@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
     try {
       const Stripe = (await import('stripe')).default
       const stripe = new Stripe(secretKey, {
-        apiVersion: '2024-12-18.acacia',
+        apiVersion: '2024-12-18.acacia' as any,
       })
       
       // Testa le credenziali facendo una chiamata semplice

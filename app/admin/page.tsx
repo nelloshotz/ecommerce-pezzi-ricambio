@@ -69,10 +69,10 @@ export default function AdminDashboard() {
 
         const activeProducts = products.filter((p: Product) => p.active).length
         const pendingOrders = orders.filter(
-          (o: Order) => o.status === 'PENDING' || o.status === 'pending'
+          (o: Order) => o.status === 'PENDING'
         ).length
         const totalRevenue = orders
-          .filter((o: Order) => o.paymentStatus === 'PAID' || o.paymentStatus === 'paid')
+          .filter((o: Order) => o.paymentStatus === 'PAID')
           .reduce((sum: number, o: Order) => sum + o.total, 0)
 
         // Calcola fatturato mese corrente
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
           .filter((o: Order) => {
             const orderDate = new Date(o.createdAt)
             return (
-              (o.paymentStatus === 'PAID' || o.paymentStatus === 'paid') &&
+              o.paymentStatus === 'PAID' &&
               orderDate >= currentMonthStart &&
               orderDate <= currentMonthEnd
             )
@@ -360,7 +360,7 @@ export default function AdminDashboard() {
                     label={{ value: 'Fatturato (€)', angle: -90, position: 'insideLeft' }}
                   />
                   <Tooltip
-                    formatter={(value: number) => [`€${value.toFixed(2)}`, 'Fatturato']}
+                    formatter={(value: any) => `€${Number(value).toFixed(2)}`}
                     labelFormatter={(label) => `Giorno ${label}`}
                   />
                   <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />

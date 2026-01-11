@@ -54,34 +54,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Query movimenti con relazioni
+    // Query movimenti
     const [movements, total] = await Promise.all([
       prisma.inventoryMovement.findMany({
         where,
-        include: {
-          product: {
-            select: {
-              id: true,
-              name: true,
-              sku: true,
-              partNumber: true,
-              brand: true,
-            },
-          },
-          order: {
-            select: {
-              id: true,
-              orderNumber: true,
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-        },
         orderBy: {
           createdAt: 'desc',
         },
@@ -106,13 +82,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       movements: movements.map((movement) => ({
         id: movement.id,
-        product: movement.product,
+        productId: movement.productId,
         type: movement.type,
         quantity: movement.quantity,
         quantityAfter: movement.quantityAfter,
         reason: movement.reason,
-        order: movement.order,
-        user: movement.user,
+        orderId: movement.orderId,
+        userId: movement.userId,
         createdAt: movement.createdAt.toISOString(),
       })),
       pagination: {

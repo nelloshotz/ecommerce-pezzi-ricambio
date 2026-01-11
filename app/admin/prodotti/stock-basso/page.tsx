@@ -8,12 +8,13 @@ import { FiAlertTriangle, FiPackage, FiEdit, FiArrowLeft } from 'react-icons/fi'
 import Link from 'next/link'
 import Image from 'next/image'
 
-interface LowStockProduct extends Product {
-  category?: {
+interface LowStockProduct extends Omit<Product, 'category'> {
+  category?: string | {
     id: string
     name: string
     slug: string
   }
+  lowStockThreshold?: number | null
 }
 
 export default function AdminStockBassoPage() {
@@ -201,7 +202,11 @@ export default function AdminStockBassoPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {product.category?.name || 'N/A'}
+                          {typeof product.category === 'object' && product.category?.name 
+                            ? product.category.name 
+                            : typeof product.category === 'string' 
+                            ? product.category 
+                            : 'N/A'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

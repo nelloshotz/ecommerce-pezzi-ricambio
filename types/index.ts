@@ -6,6 +6,7 @@ export interface Product {
   vatRate?: number // Aliquota IVA in percentuale (es. 22 per 22%)
   image: string
   category: string
+  categoryId?: string // ID della categoria (per form admin)
   productType?: string // ID del tipo prodotto (es. 'olio-motore', 'batteria')
   customFields?: Record<string, any> // Campi dinamici in base al tipo prodotto
   brand?: string
@@ -21,6 +22,9 @@ export interface Product {
   width?: number // Larghezza in cm
   depth?: number // Profondità in cm
   weight?: number // Peso in kg
+  technicalSheet?: string | null // Scheda tecnica (URL o path)
+  compatibility?: string | null // Compatibilità (es. marchi auto/moto)
+  lowStockThreshold?: number | null // Soglia minima stock per alert
   createdAt?: Date
   updatedAt?: Date
 }
@@ -39,11 +43,22 @@ export interface Cart {
   total: number
 }
 
+export interface OrderItem {
+  id: string
+  productId: string
+  quantity: number
+  price: number
+  total: number
+  productName?: string // Nome prodotto al momento dell'ordine (storico)
+  productSku?: string | null // SKU prodotto al momento dell'ordine (storico)
+  product?: Product | null // Prodotto corrente (può essere null se eliminato)
+}
+
 export interface Order {
   id: string
   orderNumber?: string
   userId: string
-  items: CartItem[]
+  items: OrderItem[]
   subtotal: number
   shippingCost: number
   shippingCarrier?: string | null // Nome corriere: "GLS", "BRT", "Poste Italiane"
