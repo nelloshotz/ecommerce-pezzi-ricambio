@@ -43,7 +43,7 @@ export async function processImage(
 
   // Crea directory upload se non esiste
   const uploadDir = join(process.cwd(), 'public', 'uploads', 'products')
-  if (!fsExistsSync(uploadDir)) {
+  if (!existsSync(uploadDir)) {
     await mkdir(uploadDir, { recursive: true })
   }
 
@@ -143,7 +143,7 @@ export async function deleteImageFiles(image: {
     // Elimina immagine originale
     if (image.imageUrl && image.imageUrl.startsWith('/uploads/')) {
       const filePath = join(publicDir, image.imageUrl.substring(1))
-      if (fsExistsSync(filePath)) {
+      if (existsSync(filePath)) {
         await unlink(filePath)
       }
     }
@@ -151,7 +151,7 @@ export async function deleteImageFiles(image: {
     // Elimina thumbnail
     if (image.thumbnailUrl && image.thumbnailUrl.startsWith('/uploads/')) {
       const thumbPath = join(publicDir, image.thumbnailUrl.substring(1))
-      if (fsExistsSync(thumbPath)) {
+      if (existsSync(thumbPath)) {
         await unlink(thumbPath)
       }
     }
@@ -159,7 +159,7 @@ export async function deleteImageFiles(image: {
     // Elimina WebP
     if (image.webpUrl && image.webpUrl.startsWith('/uploads/')) {
       const webpPath = join(publicDir, image.webpUrl.substring(1))
-      if (fsExistsSync(webpPath)) {
+      if (existsSync(webpPath)) {
         await unlink(webpPath)
       }
     }
@@ -177,7 +177,7 @@ export async function findUnusedImages(): Promise<string[]> {
     const { prisma } = await import('@/lib/prisma')
     const uploadDir = join(process.cwd(), 'public', 'uploads', 'products')
     
-    if (!fsExistsSync(uploadDir)) {
+    if (!existsSync(uploadDir)) {
       return []
     }
 
