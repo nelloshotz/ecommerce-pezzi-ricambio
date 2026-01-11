@@ -39,7 +39,7 @@ export default function AdminCouponPage() {
         setLoadingCoupons(true)
         const response = await fetch('/api/admin/coupons', {
           headers: {
-            'x-user-id': user.id,
+            'x-user-id': user?.id || '',
           },
         })
 
@@ -238,7 +238,7 @@ export default function AdminCouponPage() {
                   try {
                     const response = await fetch('/api/admin/coupons', {
                       headers: {
-                        'x-user-id': user.id || '',
+                        'x-user-id': user?.id || '',
                       },
                     })
                     if (response.ok) {
