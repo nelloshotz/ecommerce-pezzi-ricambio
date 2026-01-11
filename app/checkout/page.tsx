@@ -491,6 +491,7 @@ export default function CheckoutPage() {
   const [shippingAddress, setShippingAddress] = useState<Address | null>(null)
   const [billingAddress, setBillingAddress] = useState<Address | null>(null)
   const [shippingCalculation, setShippingCalculation] = useState<{
+    isFreeShipping?: boolean
     carrier: string
     baseCost: number
     finalCost: number
