@@ -288,7 +288,7 @@ export async function calculateShipping(
         quantity: p.quantity,
       })),
       totalWeight: 0,
-      dimensions: { totalWeight: 0, maxSide: 0, sumOfSides: 0, maxHeight: 0, maxWidth: 0, maxDepth: 0 },
+      dimensions: { height: 0, width: 0, depth: 0, maxSide: 0, sumOfSides: 0, volume: 0 },
       cost: fixedShippingPrice,
       carrier: 'Prezzo Fisso',
       format: undefined,
