@@ -1,0 +1,8 @@
+// Schema per produzione con PostgreSQL
+// Copia questo in schema.prisma quando usi PostgreSQL
+
+datasource db {
+  provider = "postgresql"  // Cambia da "sqlite" a "postgresql"
+  url      = env("DATABASE_URL")
+}
+
