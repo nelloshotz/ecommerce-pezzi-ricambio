@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       const featuredIds = products.map((p) => p.id)
 
       // Calcola vendite per prodotto tramite OrderItem (solo ordini pagati)
-      // SQLite non supporta groupBy direttamente, quindi facciamo una query manuale
+      // PostgreSQL supporta groupBy, ma manteniamo questa logica per compatibilità
       // Prima prendiamo tutti gli ordini pagati
       const paidOrders = await prisma.order.findMany({
         where: {

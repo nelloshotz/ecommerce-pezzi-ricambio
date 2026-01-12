@@ -20,15 +20,15 @@ export async function GET(request: NextRequest) {
       active: true, // Solo prodotti attivi
     }
 
-    // Ricerca testuale (SQLite non supporta mode: 'insensitive')
+    // Ricerca testuale (PostgreSQL supporta mode: 'insensitive' per case-insensitive)
     if (query.trim()) {
       where.OR = [
-        { name: { contains: query } },
-        { description: { contains: query } },
-        { brand: { contains: query } },
-        { partNumber: { contains: query } },
-        { compatibility: { contains: query } },
-        { sku: { contains: query } },
+        { name: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } },
+        { brand: { contains: query, mode: 'insensitive' } },
+        { partNumber: { contains: query, mode: 'insensitive' } },
+        { compatibility: { contains: query, mode: 'insensitive' } },
+        { sku: { contains: query, mode: 'insensitive' } },
       ]
     }
 
@@ -37,9 +37,9 @@ export async function GET(request: NextRequest) {
       where.categoryId = categoryId
     }
 
-    // Filtro brand (SQLite non supporta mode: 'insensitive')
+    // Filtro brand (PostgreSQL supporta mode: 'insensitive')
     if (brand) {
-      where.brand = { contains: brand }
+      where.brand = { contains: brand, mode: 'insensitive' }
     }
 
     // Filtro prezzo

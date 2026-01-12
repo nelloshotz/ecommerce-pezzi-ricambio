@@ -56,12 +56,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Filtro per ricerca (nome, descrizione, marca, codice, compatibilità)
-    // SQLite non supporta mode: 'insensitive', quindi filtriamo in memoria o usiamo contains normale
+    // PostgreSQL supporta mode: 'insensitive' per case-insensitive search
     if (search) {
       where.OR = [
-        { name: { contains: search } },
-        { description: { contains: search } },
-        { brand: { contains: search } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { brand: { contains: search, mode: 'insensitive' } },
         { partNumber: { contains: search } },
         { compatibility: { contains: search } },
         { sku: { contains: search } },

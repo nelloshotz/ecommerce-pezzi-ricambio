@@ -37,11 +37,11 @@ export async function GET(request: NextRequest) {
     const where: any = {}
 
     // Ricerca (nome, email, telefono, campi azienda)
-    // SQLite non supporta mode: 'insensitive', quindi usiamo contains normale
+    // PostgreSQL supporta mode: 'insensitive' per case-insensitive search
     if (search) {
       where.OR = [
-        { name: { contains: search } },
-        { email: { contains: search } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
         { phone: { contains: search } },
         { companyName: { contains: search } },
         { companyAddress: { contains: search } },
