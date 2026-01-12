@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL") // Usa file:./dev.db in locale, libsql://... su Turso
+  provider = "postgresql"  // PostgreSQL per produzione VPS, cambia a "sqlite" per sviluppo locale
+  url      = env("DATABASE_URL")
 }
 
 // Tabella Utenti

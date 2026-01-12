@@ -1,0 +1,1 @@
+postgresql://motorplanet_user:MotorPlanet2024!@57.129.4.62:5432/motorplanet?sslmode=require
