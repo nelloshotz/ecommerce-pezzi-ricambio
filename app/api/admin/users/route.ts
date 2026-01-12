@@ -42,11 +42,11 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
-        { phone: { contains: search } },
-        { companyName: { contains: search } },
-        { companyAddress: { contains: search } },
-        { companyTaxCode: { contains: search } },
-        { companyPec: { contains: search } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { companyName: { contains: search, mode: 'insensitive' } },
+        { companyAddress: { contains: search, mode: 'insensitive' } },
+        { companyTaxCode: { contains: search, mode: 'insensitive' } },
+        { companyPec: { contains: search, mode: 'insensitive' } },
       ]
     }
 

@@ -40,13 +40,12 @@ export async function GET(request: NextRequest) {
     if (categoryId) {
       where.categoryId = categoryId
     } else if (category) {
-      // Cerca categoria per nome o slug (SQLite non supporta mode: 'insensitive', usiamo toLowerCase)
-      const categoryLower = category.toLowerCase()
+      // Cerca categoria per nome o slug (PostgreSQL supporta mode: 'insensitive')
       const categoryRecord = await prisma.category.findFirst({
         where: {
           OR: [
-            { name: { contains: category } },
-            { slug: { contains: categoryLower } },
+            { name: { contains: category, mode: 'insensitive' } },
+            { slug: { contains: category, mode: 'insensitive' } },
           ],
         },
       })
@@ -62,9 +61,9 @@ export async function GET(request: NextRequest) {
         { name: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
         { brand: { contains: search, mode: 'insensitive' } },
-        { partNumber: { contains: search } },
-        { compatibility: { contains: search } },
-        { sku: { contains: search } },
+        { partNumber: { contains: search, mode: 'insensitive' } },
+        { compatibility: { contains: search, mode: 'insensitive' } },
+        { sku: { contains: search, mode: 'insensitive' } },
       ]
     }
 
