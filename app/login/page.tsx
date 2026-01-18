@@ -62,9 +62,6 @@ export default function LoginPage() {
               priority
             />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Accedi a MotorPlanet
-          </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (

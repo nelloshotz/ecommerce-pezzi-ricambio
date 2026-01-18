@@ -4,14 +4,62 @@ import { useEffect, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import ProductCard from '@/components/product/ProductCard'
 import { Product } from '@/types'
-import { FiSearch, FiX } from 'react-icons/fi'
+import { FiSearch, FiX, FiZap, FiDroplet, FiSettings, FiWrench, FiLayers, FiThermometer, FiTruck, FiBattery, FiPackage } from 'react-icons/fi'
+import type { IconType } from 'react-icons'
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+}
+
+// Mappatura categorie -> icone
+const getCategoryIcon = (categoryName: string): IconType => {
+  const nameLower = categoryName.toLowerCase()
+  
+  if (nameLower.includes('elettr')) return FiZap
+  if (nameLower.includes('lubrific')) return FiDroplet
+  if (nameLower.includes('motore')) return FiSettings
+  if (nameLower.includes('fren')) return FiWrench
+  if (nameLower.includes('filtro')) return FiLayers
+  if (nameLower.includes('radiatore') || nameLower.includes('raffredd')) return FiThermometer
+  if (nameLower.includes('trasmission')) return FiTruck
+  if (nameLower.includes('batteria') || nameLower.includes('elettric')) return FiBattery
+  
+  // Default
+  return FiPackage
+}
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
+
+  // Carica categorie al mount
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const response = await fetch('/api/categories', {
+          cache: 'no-store',
+        })
+
+        if (!response.ok) {
+          throw new Error('Errore nel caricamento categorie')
+        }
+
+        const data = await response.json()
+        setCategories(data.categories || [])
+      } catch (error) {
+        console.error('Errore nel caricamento categorie:', error)
+        setCategories([])
+      }
+    }
+
+    loadCategories()
+  }, [])
 
   // Carica prodotti featured quando non c'è ricerca
   useEffect(() => {
@@ -142,20 +190,33 @@ export default function Home() {
           )}
         </div>
         
-        {/* Link Catalogo e Categorie */}
-        <div className="flex justify-center gap-6 mt-6">
+        {/* Link Catalogo e Pulsanti Categorie */}
+        <div className="flex flex-col items-center gap-4 mt-6">
           <Link
             href="/catalogo"
             className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium"
           >
             Catalogo
           </Link>
-          <Link
-            href="/categorie"
-            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
-          >
-            Categorie
-          </Link>
+          
+          {/* Pulsanti Categorie */}
+          {categories.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-3 mt-2">
+              {categories.map((category) => {
+                const Icon = getCategoryIcon(category.name)
+                return (
+                  <Link
+                    key={category.id}
+                    href={`/catalogo?categoryId=${category.id}`}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 hover:text-primary-600 transition font-medium text-sm"
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{category.name}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
         </div>
       </section>
 
