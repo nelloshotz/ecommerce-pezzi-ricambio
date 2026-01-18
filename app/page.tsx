@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import ProductCard from '@/components/product/ProductCard'
 import { Product } from '@/types'
-import { FiSearch, FiX, FiZap, FiDroplet, FiSettings, FiWrench, FiLayers, FiThermometer, FiTruck, FiBattery, FiPackage } from 'react-icons/fi'
+import { FiSearch, FiX, FiZap, FiDroplet, FiSettings, FiTool, FiLayers, FiThermometer, FiTruck, FiBattery, FiPackage } from 'react-icons/fi'
 import type { IconType } from 'react-icons'
 
 interface Category {
@@ -20,7 +20,7 @@ const getCategoryIcon = (categoryName: string): IconType => {
   if (nameLower.includes('elettr')) return FiZap
   if (nameLower.includes('lubrific')) return FiDroplet
   if (nameLower.includes('motore')) return FiSettings
-  if (nameLower.includes('fren')) return FiWrench
+  if (nameLower.includes('fren')) return FiTool
   if (nameLower.includes('filtro')) return FiLayers
   if (nameLower.includes('radiatore') || nameLower.includes('raffredd')) return FiThermometer
   if (nameLower.includes('trasmission')) return FiTruck
