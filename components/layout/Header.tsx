@@ -73,41 +73,10 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 relative">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center h-12">
-            <Image
-              src="/logo_images/logoheader.png"
-              alt="MotorPlanet Logo"
-              width={150}
-              height={48}
-              className="h-12 w-auto object-contain"
-              priority
-            />
-          </Link>
-
-          <nav className="hidden md:flex space-x-6">
-            <Link 
-              href="/" 
-              className="text-gray-700 hover:text-primary-600 transition"
-            >
-              Home
-            </Link>
-            <Link 
-              href="/catalogo" 
-              className="text-gray-700 hover:text-primary-600 transition"
-            >
-              Catalogo
-            </Link>
-            <Link 
-              href="/categorie" 
-              className="text-gray-700 hover:text-primary-600 transition"
-            >
-              Categorie
-            </Link>
-          </nav>
-
-          <div className="flex items-center space-x-4">
+          {/* Sinistra: Carrello */}
+          <div className="flex items-center">
             <Link 
               href="/carrello" 
               className="relative p-2 text-gray-700 hover:text-primary-600 transition"
@@ -119,6 +88,22 @@ export default function Header() {
                 </span>
               )}
             </Link>
+          </div>
+
+          {/* Centro: Logo */}
+          <Link href="/" className="flex items-center h-12 absolute left-1/2 transform -translate-x-1/2">
+            <Image
+              src="/logo_images/logoheader.png"
+              alt="MotorPlanet Logo"
+              width={150}
+              height={48}
+              className="h-12 w-auto object-contain"
+              priority
+            />
+          </Link>
+
+          {/* Destra: Pulsanti Login/Menu */}
+          <div className="flex items-center space-x-4">
             {/* Pulsante Logout sempre visibile per admin */}
             {(user?.role === 'admin' || user?.role === 'ADMIN') && (
               <button
@@ -139,22 +124,13 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Link
-                  href="/registrazione"
-                  className="px-3 py-2 text-gray-700 hover:text-primary-600 transition text-sm"
-                  title="Registrati"
-                >
-                  Registrati
-                </Link>
-                <Link
-                  href="/login"
-                  className="px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition text-sm"
-                  title="Login"
-                >
-                  Accedi
-                </Link>
-              </div>
+              <Link
+                href="/login"
+                className="px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition text-sm"
+                title="Login"
+              >
+                Accedi
+              </Link>
             )}
             <button className="md:hidden p-2">
               <FiMenu className="w-6 h-6" />

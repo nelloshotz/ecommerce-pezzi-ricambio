@@ -107,10 +107,9 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <section className="mb-12">
-        <h1 className="text-4xl font-bold mb-4">Benvenuto su MotorPlanet</h1>
-        <p className="text-xl text-gray-600 mb-8">
-          Il tuo negozio online per pezzi di ricambio di qualità. Trova tutto ciò di cui hai bisogno per la tua auto.
+      <section className="mb-8">
+        <p className="text-xl text-gray-600 mb-8 text-center">
+          Trova tutti ciò di cui hai bisogno per il tuo veicolo
         </p>
       </section>
 
@@ -141,6 +140,22 @@ export default function Home() {
               Ricerca in corso...
             </p>
           )}
+        </div>
+        
+        {/* Link Catalogo e Categorie */}
+        <div className="flex justify-center gap-6 mt-6">
+          <Link
+            href="/catalogo"
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium"
+          >
+            Catalogo
+          </Link>
+          <Link
+            href="/categorie"
+            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium"
+          >
+            Categorie
+          </Link>
         </div>
       </section>
 

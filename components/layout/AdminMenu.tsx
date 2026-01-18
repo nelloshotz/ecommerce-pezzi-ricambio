@@ -243,13 +243,6 @@ export default function AdminMenu() {
               <FiHome className="w-5 h-5" />
               <span>Vai allo Store</span>
             </Link>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-red-50 transition text-red-600"
-            >
-              <FiLogOut className="w-5 h-5" />
-              <span>Logout</span>
-            </button>
           </div>
         </div>
       )}
