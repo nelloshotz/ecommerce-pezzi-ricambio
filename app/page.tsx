@@ -190,8 +190,8 @@ export default function Home() {
           )}
         </div>
         
-        {/* Link Catalogo e Pulsanti Categorie */}
-        <div className="flex flex-col items-center gap-4 mt-6">
+        {/* Link Catalogo e Pulsanti Categorie - Stessa riga */}
+        <div className="flex flex-wrap justify-center gap-3 mt-6">
           <Link
             href="/catalogo"
             className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium"
@@ -200,23 +200,19 @@ export default function Home() {
           </Link>
           
           {/* Pulsanti Categorie */}
-          {categories.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-3 mt-2">
-              {categories.map((category) => {
-                const Icon = getCategoryIcon(category.name)
-                return (
-                  <Link
-                    key={category.id}
-                    href={`/catalogo?categoryId=${category.id}`}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 hover:text-primary-600 transition font-medium text-sm"
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{category.name}</span>
-                  </Link>
-                )
-              })}
-            </div>
-          )}
+          {categories.map((category) => {
+            const Icon = getCategoryIcon(category.name)
+            return (
+              <Link
+                key={category.id}
+                href={`/catalogo?categoryId=${category.id}`}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 hover:text-primary-600 transition font-medium text-sm"
+              >
+                <Icon className="w-4 h-4" />
+                <span>{category.name}</span>
+              </Link>
+            )
+          })}
         </div>
       </section>
 
