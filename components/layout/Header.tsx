@@ -94,8 +94,8 @@ export default function Header() {
           {/* Spazio vuoto se utente non loggato per mantenere il layout */}
           {!isAuthenticated() && <div className="flex items-center w-10"></div>}
 
-          {/* Centro: Logo - più piccolo su mobile e spostato a sinistra per dare spazio al pulsante Accedi */}
-          <Link href="/" className="flex items-center h-8 md:h-12 absolute left-[35%] md:left-1/2 transform -translate-x-1/2">
+          {/* Centro: Logo - più piccolo su mobile, centrato */}
+          <Link href="/" className="flex items-center h-8 md:h-12 absolute left-1/2 transform -translate-x-1/2">
             <Image
               src="/logo_images/logoheader.png"
               alt="MotorPlanet Logo"
