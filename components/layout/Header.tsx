@@ -71,78 +71,95 @@ export default function Header() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]) // Solo user?.id come dipendenza - clearCart e loadCartFromDB sono funzioni stabili dello store
 
+  const isLoggedIn = isAuthenticated()
+
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 relative">
         <div className="flex items-center justify-between h-16">
-          {/* Sinistra: Carrello - visibile solo se utente loggato */}
-          {isAuthenticated() && (
-            <div className="flex items-center">
-              <Link 
-                href="/carrello" 
-                className="relative p-2 text-gray-700 hover:text-primary-600 transition"
-              >
-                <FiShoppingCart className="w-6 h-6" />
-                {itemCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {itemCount}
-                  </span>
-                )}
-              </Link>
-            </div>
-          )}
-          {/* Spazio vuoto se utente non loggato per mantenere il layout */}
-          {!isAuthenticated() && <div className="flex items-center w-10"></div>}
-
-          {/* Centro: Logo - più piccolo su mobile, centrato */}
-          <Link href="/" className="flex items-center h-8 md:h-12 absolute left-1/2 transform -translate-x-1/2">
-            <Image
-              src="/logo_images/logoheader.png"
-              alt="MotorPlanet Logo"
-              width={150}
-              height={48}
-              className="h-8 w-auto md:h-12 object-contain"
-              priority
-            />
-          </Link>
-
-          {/* Destra: Pulsanti Login/Menu */}
-          <div className="flex items-center space-x-2 md:space-x-4">
-            {/* Pulsante Logout sempre visibile per admin */}
-            {(user?.role === 'admin' || user?.role === 'ADMIN') && (
-              <button
-                onClick={handleLogout}
-                className="px-2 py-1.5 md:px-3 md:py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs md:text-sm flex items-center space-x-1"
-                title="Logout"
-              >
-                <FiLogOut className="w-3 h-3 md:w-4 md:h-4" />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
-            )}
-            {user ? (
-              <div className="flex items-center space-x-2">
-                {(user.role === 'admin' || user.role === 'ADMIN') ? (
-                  <AdminMenu />
-                ) : (
-                  <UserMenu />
-                )}
+          {isLoggedIn ? (
+            // Layout per utenti loggati: Carrello | Logo Centrato | Menu
+            <>
+              {/* Sinistra: Carrello */}
+              <div className="flex items-center">
+                <Link 
+                  href="/carrello" 
+                  className="relative p-2 text-gray-700 hover:text-primary-600 transition"
+                >
+                  <FiShoppingCart className="w-6 h-6" />
+                  {itemCount > 0 && (
+                    <span className="absolute top-0 right-0 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
               </div>
-            ) : (
-              <Link
-                href="/login"
-                className="px-2 py-1.5 md:px-3 md:py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition text-xs md:text-sm whitespace-nowrap"
-                title="Login"
-              >
-                Accedi
+
+              {/* Centro: Logo */}
+              <Link href="/" className="flex items-center h-8 md:h-12 absolute left-1/2 transform -translate-x-1/2">
+                <Image
+                  src="/logo_images/logoheader.png"
+                  alt="MotorPlanet Logo"
+                  width={150}
+                  height={48}
+                  className="h-8 w-auto md:h-12 object-contain"
+                  priority
+                />
               </Link>
-            )}
-            {/* Burger menu - visibile solo se utente loggato */}
-            {isAuthenticated() && (
-              <button className="md:hidden p-2">
-                <FiMenu className="w-6 h-6" />
-              </button>
-            )}
-          </div>
+
+              {/* Destra: Pulsanti Login/Menu */}
+              <div className="flex items-center space-x-2 md:space-x-4">
+                {/* Pulsante Logout sempre visibile per admin */}
+                {(user?.role === 'admin' || user?.role === 'ADMIN') && (
+                  <button
+                    onClick={handleLogout}
+                    className="px-2 py-1.5 md:px-3 md:py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs md:text-sm flex items-center space-x-1"
+                    title="Logout"
+                  >
+                    <FiLogOut className="w-3 h-3 md:w-4 md:h-4" />
+                    <span className="hidden sm:inline">Logout</span>
+                  </button>
+                )}
+                <div className="flex items-center space-x-2">
+                  {(user?.role === 'admin' || user?.role === 'ADMIN') ? (
+                    <AdminMenu />
+                  ) : (
+                    <UserMenu />
+                  )}
+                </div>
+                {/* Burger menu */}
+                <button className="md:hidden p-2">
+                  <FiMenu className="w-6 h-6" />
+                </button>
+              </div>
+            </>
+          ) : (
+            // Layout per utenti non loggati: Logo a sinistra | Accedi a destra
+            <>
+              {/* Sinistra: Logo */}
+              <Link href="/" className="flex items-center h-8 md:h-12">
+                <Image
+                  src="/logo_images/logoheader.png"
+                  alt="MotorPlanet Logo"
+                  width={150}
+                  height={48}
+                  className="h-8 w-auto md:h-12 object-contain"
+                  priority
+                />
+              </Link>
+
+              {/* Destra: Pulsante Accedi */}
+              <div className="flex items-center">
+                <Link
+                  href="/login"
+                  className="px-2 py-1.5 md:px-3 md:py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition text-xs md:text-sm whitespace-nowrap"
+                  title="Login"
+                >
+                  Accedi
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </header>
