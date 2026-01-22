@@ -32,7 +32,14 @@ export default function LoginPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Email o password non corretti')
+        let errorMessage = data.error || 'Username o password errati'
+        
+        // Se ci sono tentativi rimanenti, aggiungi il messaggio
+        if (data.remainingAttempts !== undefined && data.remainingAttempts > 0) {
+          errorMessage += `. Ancora ${data.remainingAttempts} tentativo${data.remainingAttempts > 1 ? 'i' : ''} rimanenti, poi l'account verrà bloccato per 24h.`
+        }
+        
+        throw new Error(errorMessage)
       }
 
               // Chiama login nello store con i dati utente e il token JWT

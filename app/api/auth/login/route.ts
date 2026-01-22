@@ -72,8 +72,29 @@ export async function POST(request: NextRequest) {
     // Se l'utente non esiste, registra tentativo fallito ma non rivelare che l'email non esiste
     if (!user) {
       await recordLoginAttempt(email, ipAddress, false)
+      
+      // Verifica se ora è bloccato dopo questo tentativo
+      const newBlockStatus = await isBlocked(email, ipAddress)
+      if (newBlockStatus.blocked) {
+        const hoursRemaining = Math.ceil(
+          (newBlockStatus.blockedUntil!.getTime() - Date.now()) / (1000 * 60 * 60)
+        )
+        return NextResponse.json(
+          {
+            error: `Troppi tentativi falliti. Account temporaneamente bloccato. Riprova tra ${hoursRemaining} ora${hoursRemaining > 1 ? 'e' : ''}.`,
+            blocked: true,
+            blockedUntil: newBlockStatus.blockedUntil?.toISOString(),
+          },
+          { status: 429 }
+        )
+      }
+      
+      // Mostra tentativi rimanenti
       return NextResponse.json(
-        { error: 'Email o password non corretti' },
+        {
+          error: 'Username o password errati',
+          remainingAttempts: newBlockStatus.remainingAttempts,
+        },
         { status: 401 }
       )
     }
@@ -104,7 +125,7 @@ export async function POST(request: NextRequest) {
       // Mostra tentativi rimanenti
       return NextResponse.json(
         {
-          error: 'Email o password non corretti',
+          error: 'Username o password errati',
           remainingAttempts: newBlockStatus.remainingAttempts,
         },
         { status: 401 }
