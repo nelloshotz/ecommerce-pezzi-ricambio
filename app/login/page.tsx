@@ -120,6 +120,7 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Credenziali di test - commentate per non renderle visibili
           <div className="text-sm text-gray-600">
             <p className="mb-2">Credenziali di test:</p>
             <ul className="list-disc list-inside space-y-1">
@@ -127,6 +128,7 @@ export default function LoginPage() {
               <li>Utente: user@test.it / User123! </li>
             </ul>
           </div>
+          */}
 
           <div>
             <button
