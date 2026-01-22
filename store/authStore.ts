@@ -131,9 +131,6 @@ export const useAuthStore = create<AuthStore>()(
       setUser: (user: User | null) => {
         set({ user })
       },
-      getToken: () => {
-        return get().token
-      },
     }),
     {
       name: 'auth-storage',

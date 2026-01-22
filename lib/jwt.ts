@@ -2,8 +2,13 @@ import jwt from 'jsonwebtoken'
 import { User } from '@prisma/client'
 
 // Chiave segreta per firmare i token (usa variabile d'ambiente in produzione)
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production'
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h' // Token valido per 24 ore
+const JWT_SECRET: string = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production'
+const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '24h' // Token valido per 24 ore
+
+// Verifica che JWT_SECRET sia una stringa valida (solo in runtime, non durante il build)
+if (typeof window === 'undefined' && (!JWT_SECRET || JWT_SECRET.trim() === '')) {
+  console.warn('⚠️ JWT_SECRET non è configurato. Usa una chiave sicura in produzione.')
+}
 
 export interface JWTPayload {
   userId: string
@@ -23,9 +28,9 @@ export function generateToken(user: Pick<User, 'id' | 'email' | 'role'>): string
     role: user.role,
   }
 
-  return jwt.sign(payload, JWT_SECRET, {
+  return jwt.sign(payload, JWT_SECRET as string, {
     expiresIn: JWT_EXPIRES_IN,
-  })
+  } as jwt.SignOptions)
 }
 
 /**
@@ -33,7 +38,7 @@ export function generateToken(user: Pick<User, 'id' | 'email' | 'role'>): string
  */
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload
+    const decoded = jwt.verify(token, JWT_SECRET as string) as JWTPayload
     return decoded
   } catch (error) {
     // Token invalido, scaduto o manomesso
