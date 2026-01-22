@@ -136,9 +136,12 @@ export default function Header() {
                 Accedi
               </Link>
             )}
-            <button className="md:hidden p-2">
-              <FiMenu className="w-6 h-6" />
-            </button>
+            {/* Burger menu - visibile solo se utente loggato */}
+            {isAuthenticated() && (
+              <button className="md:hidden p-2">
+                <FiMenu className="w-6 h-6" />
+              </button>
+            )}
           </div>
         </div>
       </div>
