@@ -249,9 +249,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     const { id } = params
+    const adminUserId = authResult.user.userId
 
     // Verifica che non si stia eliminando se stesso
-    if (id === userId) {
+    if (id === adminUserId) {
       return NextResponse.json(
         { error: 'Non puoi eliminare il tuo stesso account' },
         { status: 400 }
