@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { FiMail, FiLock, FiUser, FiPhone, FiMapPin, FiHome, FiAlertCircle, FiCheckCircle } from 'react-icons/fi'
+import { FiMail, FiLock, FiUser, FiPhone, FiMapPin, FiHome, FiAlertCircle, FiCheckCircle, FiEye, FiEyeOff } from 'react-icons/fi'
 
 interface FormData {
   // Dati Account
@@ -84,6 +84,8 @@ export default function RegistrazionePage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -310,15 +312,27 @@ export default function RegistrazionePage() {
                   </div>
                   <input
                     id="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className={`appearance-none relative block w-full pl-10 pr-3 py-2 border ${
+                    className={`appearance-none relative block w-full pl-10 pr-10 py-2 border ${
                       errors.password ? 'border-red-300' : 'border-gray-300'
                     } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500`}
                     placeholder="Minimo 6 caratteri"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                    aria-label={showPassword ? 'Nascondi password' : 'Mostra password'}
+                  >
+                    {showPassword ? (
+                      <FiEyeOff className="h-5 w-5" />
+                    ) : (
+                      <FiEye className="h-5 w-5" />
+                    )}
+                  </button>
                 </div>
                 {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
               </div>
@@ -333,15 +347,27 @@ export default function RegistrazionePage() {
                   </div>
                   <input
                     id="confirmPassword"
-                    type="password"
+                    type={showConfirmPassword ? 'text' : 'password'}
                     required
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className={`appearance-none relative block w-full pl-10 pr-3 py-2 border ${
+                    className={`appearance-none relative block w-full pl-10 pr-10 py-2 border ${
                       errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                     } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500`}
                     placeholder="Ripeti la password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                    aria-label={showConfirmPassword ? 'Nascondi password' : 'Mostra password'}
+                  >
+                    {showConfirmPassword ? (
+                      <FiEyeOff className="h-5 w-5" />
+                    ) : (
+                      <FiEye className="h-5 w-5" />
+                    )}
+                  </button>
                 </div>
                 {errors.confirmPassword && (
                   <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
