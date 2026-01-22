@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Product } from '@/types'
@@ -13,7 +14,9 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter()
   const addItem = useCartStore(state => state.addItem)
+  const { user, isAuthenticated } = useAuthStore()
   const [activeOffer, setActiveOffer] = useState<{
     discountPercent: number
     endDate: string
@@ -40,7 +43,15 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
-    await addItem(product, 1)
+    e.stopPropagation() // Evita che il click apra il link del prodotto
+    
+    // Se l'utente non è loggato, reindirizza al login
+    if (!isAuthenticated()) {
+      router.push('/login')
+      return
+    }
+    
+    await addItem(product, 1, user?.id)
   }
 
   return (

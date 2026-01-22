@@ -75,23 +75,27 @@ export default function Header() {
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 relative">
         <div className="flex items-center justify-between h-16">
-          {/* Sinistra: Carrello */}
-          <div className="flex items-center">
-            <Link 
-              href="/carrello" 
-              className="relative p-2 text-gray-700 hover:text-primary-600 transition"
-            >
-              <FiShoppingCart className="w-6 h-6" />
-              {itemCount > 0 && (
-                <span className="absolute top-0 right-0 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {itemCount}
-                </span>
-              )}
-            </Link>
-          </div>
+          {/* Sinistra: Carrello - visibile solo se utente loggato */}
+          {isAuthenticated() && (
+            <div className="flex items-center">
+              <Link 
+                href="/carrello" 
+                className="relative p-2 text-gray-700 hover:text-primary-600 transition"
+              >
+                <FiShoppingCart className="w-6 h-6" />
+                {itemCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+          )}
+          {/* Spazio vuoto se utente non loggato per mantenere il layout */}
+          {!isAuthenticated() && <div className="flex items-center w-10"></div>}
 
-          {/* Centro: Logo - più piccolo su mobile per dare spazio al pulsante Accedi */}
-          <Link href="/" className="flex items-center h-8 md:h-12 absolute left-1/2 transform -translate-x-1/2">
+          {/* Centro: Logo - più piccolo su mobile e spostato a sinistra per dare spazio al pulsante Accedi */}
+          <Link href="/" className="flex items-center h-8 md:h-12 absolute left-[35%] md:left-1/2 transform -translate-x-1/2">
             <Image
               src="/logo_images/logoheader.png"
               alt="MotorPlanet Logo"

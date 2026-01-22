@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Product } from '@/types'
 import { useCartStore } from '@/store/cartStore'
@@ -12,8 +13,9 @@ interface ProductDetailsProps {
 }
 
 export default function ProductDetails({ product }: ProductDetailsProps) {
+  const router = useRouter()
   const addItem = useCartStore(state => state.addItem)
-  const { user } = useAuthStore()
+  const { user, isAuthenticated } = useAuthStore()
   const [quantity, setQuantity] = useState(1)
   const [activeOffer, setActiveOffer] = useState<{
     discountPercent: number
@@ -40,6 +42,12 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   }, [product.id])
 
   const handleAddToCart = async () => {
+    // Se l'utente non è loggato, reindirizza al login
+    if (!isAuthenticated()) {
+      router.push('/login')
+      return
+    }
+    
     await addItem(product, quantity, user?.id)
     setQuantity(1)
   }
