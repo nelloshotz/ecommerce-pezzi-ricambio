@@ -108,3 +108,4 @@ echo -e "${YELLOW}📝 Logs: pm2 logs $APP_NAME${NC}"
 echo -e "${YELLOW}📊 Monitoring: pm2 monit${NC}"
 
 
+

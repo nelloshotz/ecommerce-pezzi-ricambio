@@ -9,6 +9,7 @@ import {
 import { appendFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
+import { verifyAuth } from '@/lib/auth'
 
 const LOG_DIR = join(process.cwd(), 'logs')
 const ERROR_LOG_FILE = join(LOG_DIR, 'admin-profilo-errors.log')
@@ -34,34 +35,17 @@ async function writeLog(data: any) {
 // GET - Recupera carrello utente
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id')
+    // Verifica autenticazione JWT
+    const authResult = await verifyAuth(request)
 
-    if (!userId) {
+    if (authResult.error || !authResult.user) {
       return NextResponse.json(
-        { error: 'Utente non autenticato' },
+        { error: authResult.error || 'Utente non autenticato' },
         { status: 401 }
       )
     }
 
-    // Verifica se l'utente è bannato
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, banned: true },
-    })
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Utente non trovato' },
-        { status: 404 }
-      )
-    }
-
-    if (user.banned) {
-      return NextResponse.json(
-        { error: 'Account bannato. Non puoi accedere al carrello.' },
-        { status: 403 }
-      )
-    }
+    const userId = authResult.user.userId
 
     // Prima di tutto, rimuovi le prenotazioni scadute
     await removeExpiredReservations()
@@ -151,7 +135,17 @@ export async function POST(request: NextRequest) {
   let userId: string | null = null
   
   try {
-    userId = request.headers.get('x-user-id')
+    // Verifica autenticazione JWT
+    const authResult = await verifyAuth(request)
+
+    if (authResult.error || !authResult.user) {
+      return NextResponse.json(
+        { error: authResult.error || 'Utente non autenticato' },
+        { status: 401 }
+      )
+    }
+
+    userId = authResult.user.userId
     body = await request.json()
     productId = body.productId
     quantity = body.quantity
@@ -164,13 +158,6 @@ export async function POST(request: NextRequest) {
       price,
       userId,
     })
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Utente non autenticato' },
-        { status: 401 }
-      )
-    }
 
     // Verifica se l'utente è bannato
     const user = await prisma.user.findUnique({
@@ -340,7 +327,17 @@ export async function POST(request: NextRequest) {
 // DELETE - Rimuovi prodotto dal carrello
 export async function DELETE(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id')
+    // Verifica autenticazione JWT
+    const authResult = await verifyAuth(request)
+
+    if (authResult.error || !authResult.user) {
+      return NextResponse.json(
+        { error: authResult.error || 'Utente non autenticato' },
+        { status: 401 }
+      )
+    }
+
+    const userId = authResult.user.userId
     const { searchParams } = new URL(request.url)
     const productId = searchParams.get('productId')
 
@@ -404,11 +401,21 @@ export async function DELETE(request: NextRequest) {
 // PUT - Aggiorna quantità prodotto nel carrello
 export async function PUT(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id')
+    // Verifica autenticazione JWT
+    const authResult = await verifyAuth(request)
+
+    if (authResult.error || !authResult.user) {
+      return NextResponse.json(
+        { error: authResult.error || 'Utente non autenticato' },
+        { status: 401 }
+      )
+    }
+
+    const userId = authResult.user.userId
     const body = await request.json()
     const { productId, quantity, price } = body
 
-    if (!userId) {
+    if (!productId || quantity === undefined) {
       return NextResponse.json(
         { error: 'Utente non autenticato' },
         { status: 401 }

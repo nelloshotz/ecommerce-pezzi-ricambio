@@ -90,29 +90,29 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Centro: Logo */}
-          <Link href="/" className="flex items-center h-12 absolute left-1/2 transform -translate-x-1/2">
+          {/* Centro: Logo - più piccolo su mobile per dare spazio al pulsante Accedi */}
+          <Link href="/" className="flex items-center h-8 md:h-12 absolute left-1/2 transform -translate-x-1/2">
             <Image
               src="/logo_images/logoheader.png"
               alt="MotorPlanet Logo"
               width={150}
               height={48}
-              className="h-12 w-auto object-contain"
+              className="h-8 w-auto md:h-12 object-contain"
               priority
             />
           </Link>
 
           {/* Destra: Pulsanti Login/Menu */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
             {/* Pulsante Logout sempre visibile per admin */}
             {(user?.role === 'admin' || user?.role === 'ADMIN') && (
               <button
                 onClick={handleLogout}
-                className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm flex items-center space-x-1"
+                className="px-2 py-1.5 md:px-3 md:py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs md:text-sm flex items-center space-x-1"
                 title="Logout"
               >
-                <FiLogOut className="w-4 h-4" />
-                <span>Logout</span>
+                <FiLogOut className="w-3 h-3 md:w-4 md:h-4" />
+                <span className="hidden sm:inline">Logout</span>
               </button>
             )}
             {user ? (
@@ -126,7 +126,7 @@ export default function Header() {
             ) : (
               <Link
                 href="/login"
-                className="px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition text-sm"
+                className="px-2 py-1.5 md:px-3 md:py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition text-xs md:text-sm whitespace-nowrap"
                 title="Login"
               >
                 Accedi

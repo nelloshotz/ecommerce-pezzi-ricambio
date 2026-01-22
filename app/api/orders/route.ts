@@ -21,7 +21,18 @@ function generateTrackingNumber(): string {
 // POST - Crea nuovo ordine dal checkout
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id')
+    // Verifica autenticazione JWT
+    const { verifyAuth } = await import('@/lib/auth')
+    const authResult = await verifyAuth(request)
+
+    if (authResult.error || !authResult.user) {
+      return NextResponse.json(
+        { error: authResult.error || 'Utente non autenticato' },
+        { status: 401 }
+      )
+    }
+
+    const userId = authResult.user.userId
     const body = await request.json()
 
     const {
@@ -47,13 +58,6 @@ export async function POST(request: NextRequest) {
       stripePaymentIntentId,
       stripeClientSecret,
     } = body
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Utente non autenticato' },
-        { status: 401 }
-      )
-    }
 
     // Verifica se l'utente è bannato
     const user = await prisma.user.findUnique({

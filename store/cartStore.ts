@@ -15,17 +15,24 @@ interface CartStore {
   getItemCount: () => number
 }
 
+// Funzione helper per ottenere header con autenticazione JWT
+const getAuthHeaders = async () => {
+  const { getAuthHeaders: getHeaders } = await import('@/lib/apiClient')
+  return {
+    'Content-Type': 'application/json',
+    ...getHeaders(),
+  }
+}
+
 // Funzione helper per sincronizzare con database
 const syncWithDB = async (userId: string, items: CartItem[]) => {
   try {
+    const headers = await getAuthHeaders()
     // Sincronizza ogni item con il database
     for (const item of items) {
       await fetch('/api/cart', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': userId,
-        },
+        headers,
         body: JSON.stringify({
           productId: item.product.id,
           quantity: item.quantity,
@@ -69,10 +76,9 @@ export const useCartStore = create<CartStore>()(
           
           // INFINE: Carica il carrello dal database (specifico per questo userId)
           // Il database è la fonte di verità per ogni utente
+          const { getAuthHeaders } = await import('@/lib/apiClient')
           const response = await fetch('/api/cart', {
-            headers: {
-              'x-user-id': userId,
-            },
+            headers: getAuthHeaders(),
             cache: 'no-store', // Non usare cache per avere sempre dati aggiornati
           })
 
@@ -357,12 +363,10 @@ export const useCartStore = create<CartStore>()(
                 // Ignora errori di logging
               }
               
+              const headers = await getAuthHeaders()
               const response = await fetch('/api/cart', {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'x-user-id': userId,
-                },
+                headers,
                 body: JSON.stringify(requestBody),
               })
 
@@ -414,11 +418,10 @@ export const useCartStore = create<CartStore>()(
         // Se utente loggato, sincronizza con database
         if (userId) {
           try {
+            const headers = await getAuthHeaders()
             await fetch(`/api/cart?productId=${productId}`, {
               method: 'DELETE',
-              headers: {
-                'x-user-id': userId,
-              },
+              headers,
             })
           } catch (error) {
             console.error('Errore rimozione carrello:', error)
@@ -453,12 +456,10 @@ export const useCartStore = create<CartStore>()(
         // Se utente loggato, sincronizza con database
         if (userId) {
           try {
+            const headers = await getAuthHeaders()
             const response = await fetch('/api/cart', {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-user-id': userId,
-              },
+              headers,
               body: JSON.stringify({
                 productId,
                 quantity,
@@ -492,19 +493,16 @@ export const useCartStore = create<CartStore>()(
         if (userId) {
           try {
             // Carica items dal DB e rimuovili uno per uno
+            const headers = await getAuthHeaders()
             const response = await fetch('/api/cart', {
-              headers: {
-                'x-user-id': userId,
-              },
+              headers,
             })
             if (response.ok) {
               const data = await response.json()
               for (const item of data.items || []) {
                 await fetch(`/api/cart?productId=${item.productId}`, {
                   method: 'DELETE',
-                  headers: {
-                    'x-user-id': userId,
-                  },
+                  headers,
                 })
               }
             }

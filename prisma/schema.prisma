@@ -346,6 +346,23 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+// Tabella Tentativi Login Falliti (per rate limiting)
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String?  // Email tentata (null se blocco per IP)
+  ipAddress String   // IP da cui proviene il tentativo
+  success   Boolean  @default(false) // true se login riuscito
+  blocked   Boolean  @default(false) // true se bloccato dopo 3 tentativi
+  blockedUntil DateTime? // Data fino a quando è bloccato (24h dopo 3 tentativi)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([ipAddress])
+  @@index([blockedUntil])
+  @@index([createdAt])
+  @@map("login_attempts")
+}
+
 // Tabella Recensioni Ordine
 model Review {
   id        String   @id @default(cuid())

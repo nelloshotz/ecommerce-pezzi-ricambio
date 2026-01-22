@@ -1,0 +1,60 @@
+import jwt from 'jsonwebtoken'
+import { User } from '@prisma/client'
+
+// Chiave segreta per firmare i token (usa variabile d'ambiente in produzione)
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production'
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h' // Token valido per 24 ore
+
+export interface JWTPayload {
+  userId: string
+  email: string
+  role: string
+  iat?: number
+  exp?: number
+}
+
+/**
+ * Genera un JWT token per un utente
+ */
+export function generateToken(user: Pick<User, 'id' | 'email' | 'role'>): string {
+  const payload: JWTPayload = {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+  }
+
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
+  })
+}
+
+/**
+ * Verifica e decodifica un JWT token
+ */
+export function verifyToken(token: string): JWTPayload | null {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload
+    return decoded
+  } catch (error) {
+    // Token invalido, scaduto o manomesso
+    return null
+  }
+}
+
+/**
+ * Estrae il token dall'header Authorization
+ */
+export function extractTokenFromHeader(authHeader: string | null): string | null {
+  if (!authHeader) {
+    return null
+  }
+
+  // Formato: "Bearer <token>"
+  const parts = authHeader.split(' ')
+  if (parts.length !== 2 || parts[0] !== 'Bearer') {
+    return null
+  }
+
+  return parts[1]
+}
+

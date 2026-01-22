@@ -467,3 +467,4 @@ psql -U motorplanet_user -d motorplanet -h localhost
 Vuoi che crei gli script automatici per fare tutto questo?
 
 
+

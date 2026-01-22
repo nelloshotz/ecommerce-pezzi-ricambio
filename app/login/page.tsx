@@ -35,12 +35,12 @@ export default function LoginPage() {
         throw new Error(data.error || 'Email o password non corretti')
       }
 
-      // Chiama login nello store con i dati utente
-      await login(email, password, data.user)
+              // Chiama login nello store con i dati utente e il token JWT
+              await login(email, password, data.user, data.token)
 
-      // Reindirizza alla home
-      router.push('/')
-      router.refresh()
+              // Reindirizza alla home
+              router.push('/')
+              router.refresh()
     } catch (err: any) {
       setError(err.message || 'Errore durante il login. Riprova.')
     } finally {

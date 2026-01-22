@@ -4,20 +4,23 @@ import { User } from '@/types'
 
 interface AuthStore {
   user: User | null
+  token: string | null // JWT token
   loginTimestamp: number | null // Timestamp del login (per logout automatico a mezzanotte)
-  login: (email: string, password: string, userData?: User) => Promise<boolean>
+  login: (email: string, password: string, userData?: User, token?: string) => Promise<boolean>
   logout: () => Promise<void>
   isAuthenticated: () => boolean
   isAdmin: () => boolean
   setUser: (user: User | null) => void
+  getToken: () => string | null
 }
 
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
       user: null,
+      token: null,
       loginTimestamp: null,
-      login: async (email: string, password: string, userData?: User) => {
+      login: async (email: string, password: string, userData?: User, token?: string) => {
         // Funzione helper per pulire completamente il carrello locale
         const clearCartLocal = async () => {
           if (typeof window !== 'undefined') {
@@ -59,9 +62,9 @@ export const useAuthStore = create<AuthStore>()(
           // PRIMA: Pulisci completamente il carrello locale del precedente utente
           await clearCartLocal()
           
-          // POI: Salva i dati del nuovo utente (questo triggererà il reload delle pagine)
+          // POI: Salva i dati del nuovo utente e il token (questo triggererà il reload delle pagine)
           const loginTime = Date.now()
-          set({ user: userData, loginTimestamp: loginTime })
+          set({ user: userData, token: token || null, loginTimestamp: loginTime })
           
           // INFINE: Carica il carrello del nuovo utente dal database
           // Usa un piccolo delay per garantire che lo store sia aggiornato
@@ -86,9 +89,13 @@ export const useAuthStore = create<AuthStore>()(
             // PRIMA: Pulisci completamente il carrello locale del precedente utente
             await clearCartLocal()
             
-            // POI: Salva i dati del nuovo utente (questo triggererà il reload delle pagine)
+            // POI: Salva i dati del nuovo utente e il token JWT (questo triggererà il reload delle pagine)
             const loginTime = Date.now()
-            set({ user: data.user, loginTimestamp: loginTime })
+            set({ 
+              user: data.user, 
+              token: data.token || null, // Salva il token JWT
+              loginTimestamp: loginTime 
+            })
             
             // INFINE: Carica il carrello del nuovo utente dal database
             // Usa un piccolo delay per garantire che lo store sia aggiornato
@@ -109,7 +116,10 @@ export const useAuthStore = create<AuthStore>()(
         if (typeof window !== 'undefined') {
           localStorage.removeItem('cart-storage')
         }
-        set({ user: null, loginTimestamp: null })
+        set({ user: null, token: null, loginTimestamp: null })
+      },
+      getToken: () => {
+        return get().token
       },
       isAuthenticated: () => {
         return get().user !== null
@@ -120,6 +130,9 @@ export const useAuthStore = create<AuthStore>()(
       },
       setUser: (user: User | null) => {
         set({ user })
+      },
+      getToken: () => {
+        return get().token
       },
     }),
     {

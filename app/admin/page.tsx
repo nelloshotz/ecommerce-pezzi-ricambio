@@ -30,24 +30,23 @@ export default function AdminDashboard() {
     async function loadStats() {
       try {
         setLoading(true)
+        const { getAuthHeaders } = await import('@/lib/apiClient')
+        const authHeaders = getAuthHeaders()
+        
         const [productsResponse, ordersResponse, usersResponse] = await Promise.all([
           fetch('/api/products?includeInactive=true', {
             headers: {
               'x-include-inactive': 'true',
-              'x-user-id': currentUser?.id || '',
+              ...authHeaders,
             },
             cache: 'no-store',
           }),
           fetch('/api/admin/orders', {
-            headers: {
-              'x-user-id': currentUser?.id || '',
-            },
+            headers: authHeaders,
             cache: 'no-store',
           }),
           fetch('/api/admin/users', {
-            headers: {
-              'x-user-id': currentUser?.id || '',
-            },
+            headers: authHeaders,
             cache: 'no-store',
           }),
         ])

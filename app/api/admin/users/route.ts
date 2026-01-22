@@ -1,29 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import * as bcrypt from 'bcryptjs'
+import { verifyAdmin } from '@/lib/auth'
 
 // GET - Lista utenti (solo admin)
 export async function GET(request: NextRequest) {
   try {
-    // Verifica autenticazione admin (da implementare middleware o verifica header)
-    const userId = request.headers.get('x-user-id')
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Utente non autenticato' },
-        { status: 401 }
-      )
-    }
+    // Verifica autenticazione admin
+    const authResult = await verifyAdmin(request)
 
-    // Verifica ruolo admin
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    })
-
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'admin')) {
+    if (authResult.error || !authResult.user) {
       return NextResponse.json(
-        { error: 'Accesso negato. Solo amministratori.' },
-        { status: 403 }
+        { error: authResult.error || 'Utente non autenticato' },
+        { status: authResult.error?.includes('Accesso negato') ? 403 : 401 }
       )
     }
 
@@ -129,26 +118,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Verifica autenticazione admin
-    const userId = request.headers.get('x-user-id')
-    if (!userId) {
+    const authResult = await verifyAdmin(request)
+
+    if (authResult.error || !authResult.user) {
       return NextResponse.json(
-        { error: 'Utente non autenticato' },
-        { status: 401 }
+        { error: authResult.error || 'Utente non autenticato' },
+        { status: authResult.error?.includes('Accesso negato') ? 403 : 401 }
       )
     }
 
-    // Verifica ruolo admin
-    const admin = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    })
-
-    if (!admin || (admin.role !== 'ADMIN' && admin.role !== 'admin')) {
-      return NextResponse.json(
-        { error: 'Accesso negato. Solo amministratori.' },
-        { status: 403 }
-      )
-    }
+    const userId = authResult.user.userId
 
     const body = await request.json()
     const { email, password, name, phone, role = 'CUSTOMER' } = body
