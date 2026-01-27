@@ -61,6 +61,7 @@ export default function ModificaProdottoPage() {
     discountPercent: number
     endDate: string
   } | null>(null)
+  const [priceInput, setPriceInput] = useState<string>('')
 
   // Carica categorie
   useEffect(() => {
@@ -146,6 +147,12 @@ export default function ModificaProdottoPage() {
           })
           setImagePreview(prod.image || '/images/placeholder.svg')
           setTechnicalSheetPreview(prod.technicalSheet || '')
+          // Sincronizza priceInput con il prezzo caricato
+          if (prod.price && prod.price > 0) {
+            setPriceInput(prod.price.toFixed(2).replace('.', ','))
+          } else {
+            setPriceInput('')
+          }
         }
       } catch (error) {
         console.error('Errore nel caricamento prodotto:', error)
@@ -462,18 +469,28 @@ export default function ModificaProdottoPage() {
             <input
               type="text"
               required
-              value={formData.price && formData.price > 0 ? formData.price.toFixed(2).replace('.', ',') : ''}
+              value={priceInput}
               onChange={(e) => {
-                // Permette virgola o punto come separatore decimale
+                // Permette virgola o punto come separatore decimale, mantiene il valore come stringa
                 let value = e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
                 // Rimuove punti multipli o virgole multiple
                 const parts = value.split('.')
                 if (parts.length > 2) {
                   value = parts[0] + '.' + parts.slice(1).join('')
                 }
-                // Se il campo è vuoto, imposta 0, altrimenti parseFloat
+                // Aggiorna lo stato locale (stringa)
+                setPriceInput(value)
+                // Aggiorna anche formData con il valore numerico
                 const numValue = value === '' || value === '-' ? 0 : (parseFloat(value) || 0)
                 setFormData({ ...formData, price: numValue })
+              }}
+              onBlur={(e) => {
+                // Quando perde il focus, formatta il valore se presente
+                if (formData.price && formData.price > 0) {
+                  setPriceInput(formData.price.toFixed(2).replace('.', ','))
+                } else if (priceInput === '' || priceInput === '-') {
+                  setPriceInput('')
+                }
               }}
               placeholder="0,00"
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
