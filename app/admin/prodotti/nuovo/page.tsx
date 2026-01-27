@@ -213,8 +213,13 @@ export default function NuovoProdottoPage() {
         formDataToSend.append('technicalSheet', technicalSheetFile)
       }
 
+      // Ottieni header di autenticazione
+      const { getAuthHeaders } = await import('@/lib/apiClient')
+      const authHeaders = getAuthHeaders()
+
       const response = await fetch('/api/admin/products', {
         method: 'POST',
+        headers: authHeaders,
         body: formDataToSend,
       })
 

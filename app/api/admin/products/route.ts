@@ -3,10 +3,28 @@ import { prisma } from '@/lib/prisma'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
+import { verifyAuth } from '@/lib/auth'
 
 // POST - Crea nuovo prodotto con upload foto e scheda tecnica
 export async function POST(request: NextRequest) {
   try {
+    // Verifica autenticazione
+    const authResult = await verifyAuth(request)
+    if (!authResult.success) {
+      return NextResponse.json(
+        { error: authResult.error || 'Utente non autenticato' },
+        { status: 401 }
+      )
+    }
+
+    // Verifica ruolo admin
+    if (authResult.user.role !== 'ADMIN' && authResult.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Accesso negato. Solo amministratori.' },
+        { status: 403 }
+      )
+    }
+
     const formData = await request.formData()
     
     const name = formData.get('name') as string
@@ -260,10 +278,32 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({ product }, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Errore nella creazione prodotto:', error)
+    
+    // Restituisci un messaggio di errore più specifico
+    let errorMessage = 'Errore nella creazione prodotto'
+    
+    if (error?.message) {
+      errorMessage = error.message
+    } else if (error?.code) {
+      // Errori Prisma
+      if (error.code === 'P2002') {
+        errorMessage = 'Un prodotto con questo SKU o slug esiste già'
+      } else if (error.code === 'P2003') {
+        errorMessage = 'Categoria non valida o non trovata'
+      } else {
+        errorMessage = `Errore database: ${error.code}`
+      }
+    } else if (error?.name === 'PrismaClientKnownRequestError') {
+      errorMessage = 'Errore nel salvataggio nel database. Verifica i dati inseriti.'
+    }
+    
     return NextResponse.json(
-      { error: 'Errore nella creazione prodotto' },
+      { 
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+      },
       { status: 500 }
     )
   }
