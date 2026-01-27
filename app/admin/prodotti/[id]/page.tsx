@@ -653,7 +653,7 @@ export default function ModificaProdottoPage() {
             <input
               type="text"
               required
-              value={formData.stockQuantity > 0 ? formData.stockQuantity.toString().replace('.', ',') : ''}
+              value={formData.stockQuantity && formData.stockQuantity > 0 ? formData.stockQuantity.toString().replace('.', ',') : ''}
               onChange={(e) => {
                 // Permette virgola o punto come separatore decimale
                 let value = e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
