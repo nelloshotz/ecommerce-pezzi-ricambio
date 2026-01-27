@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     // Verifica autenticazione
     const authResult = await verifyAuth(request)
-    if (!authResult.success) {
+    if (authResult.error || !authResult.user) {
       return NextResponse.json(
         { error: authResult.error || 'Utente non autenticato' },
         { status: 401 }
