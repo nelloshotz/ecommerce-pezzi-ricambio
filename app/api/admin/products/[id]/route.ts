@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { writeFile, mkdir } from 'fs/promises'
-import { existsSync } from 'fs'
-import { join } from 'path'
 import { verifyAuth } from '@/lib/auth'
 
 interface RouteParams {
@@ -216,15 +213,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Prepara dati update
     const updateData: any = {}
 
-    // Gestione upload immagine
+    // Gestione upload immagine - salva come base64 nel database
     let finalImageUrl = imageUrl
+    let finalImageData: string | null = null
     if (imageFile && typeof imageFile === 'object' && 'size' in imageFile && 'name' in imageFile) {
-      // Upload nuova immagine
-      const uploadDir = join(process.cwd(), 'public', 'uploads', 'products')
-      if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true })
-      }
-
       const fileType = (imageFile as any).type || ''
       const fileNameFromFile = (imageFile as any).name || 'image.jpg'
       
@@ -243,26 +235,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         )
       }
 
-      const timestamp = Date.now()
-      const sanitizedName = fileNameFromFile.replace(/[^a-zA-Z0-9.-]/g, '_')
-      const fileName = `${timestamp}_${sanitizedName}`
-      const filePath = join(uploadDir, fileName)
-
+      // Converti immagine in base64
       const arrayBuffer = await (imageFile as any).arrayBuffer()
       const buffer = Buffer.from(arrayBuffer)
-      await writeFile(filePath, buffer)
-
-      finalImageUrl = `/uploads/products/${fileName}`
+      finalImageData = `data:${fileType || 'image/jpeg'};base64,${buffer.toString('base64')}`
+      
+      // Usa un URL virtuale per riferimento
+      finalImageUrl = `/api/products/image/${Date.now()}_${fileNameFromFile.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     }
 
-    // Gestione upload scheda tecnica
+    // Gestione upload scheda tecnica - salva come base64 nel database
     let finalTechnicalSheetUrl = technicalSheetUrl
+    let finalTechnicalSheetData: string | null = null
     if (technicalSheetFile && typeof technicalSheetFile === 'object' && 'size' in technicalSheetFile && 'name' in technicalSheetFile) {
-      const uploadDir = join(process.cwd(), 'public', 'uploads', 'technical-sheets')
-      if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true })
-      }
-
       const fileType = (technicalSheetFile as any).type || ''
       const fileNameFromFile = (technicalSheetFile as any).name || 'document.pdf'
       
@@ -281,16 +266,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         )
       }
 
-      const timestamp = Date.now()
-      const sanitizedName = fileNameFromFile.replace(/[^a-zA-Z0-9.-]/g, '_')
-      const fileName = `${timestamp}_${sanitizedName}`
-      const filePath = join(uploadDir, fileName)
-
+      // Converti PDF in base64
       const arrayBuffer = await (technicalSheetFile as any).arrayBuffer()
       const buffer = Buffer.from(arrayBuffer)
-      await writeFile(filePath, buffer)
-
-      finalTechnicalSheetUrl = `/uploads/technical-sheets/${fileName}`
+      finalTechnicalSheetData = `data:application/pdf;base64,${buffer.toString('base64')}`
+      
+      // Usa un URL virtuale per riferimento
+      finalTechnicalSheetUrl = `/api/products/technical-sheet/${Date.now()}_${fileNameFromFile.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     }
 
     if (name !== undefined) updateData.name = name
@@ -298,6 +280,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (price !== undefined) updateData.price = parseFloat(String(price))
     if (vatRate !== undefined) updateData.vatRate = vatRate || null
     if (finalImageUrl !== undefined) updateData.image = finalImageUrl
+    if (finalImageData !== undefined) updateData.imageData = finalImageData
+    if (finalTechnicalSheetUrl !== undefined) updateData.technicalSheet = finalTechnicalSheetUrl
+    if (finalTechnicalSheetData !== undefined) updateData.technicalSheetData = finalTechnicalSheetData
     if (categoryId !== undefined) updateData.categoryId = categoryId
     if (productTypeId !== undefined) updateData.productTypeId = productTypeId || null
     if (brand !== undefined) updateData.brand = brand || null

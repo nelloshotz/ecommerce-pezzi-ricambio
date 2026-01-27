@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
 import { verifyAuth } from '@/lib/auth'
 
 // POST - Crea nuovo prodotto con upload foto e scheda tecnica
@@ -140,15 +137,10 @@ export async function POST(request: NextRequest) {
     // Usa lo SKU fornito (già validato come univoco sopra)
     const uniqueSku = providedSku
 
-    // Gestione upload immagine
+    // Gestione upload immagine - salva come base64 nel database
     let imagePath = imageUrl || '/images/placeholder.svg'
+    let imageDataBase64: string | null = null
     if (imageFile) {
-      // Crea directory se non esiste
-      const uploadDir = join(process.cwd(), 'public', 'uploads', 'products')
-      if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true })
-      }
-
       // Verifica tipo file
       if (!imageFile.type.startsWith('image/')) {
         return NextResponse.json(
@@ -165,29 +157,19 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Genera nome file univoco
-      const timestamp = Date.now()
-      const sanitizedName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-      const fileName = `${timestamp}_${sanitizedName}`
-      const filePath = join(uploadDir, fileName)
-
-      // Salva file
+      // Converti immagine in base64
       const bytes = await imageFile.arrayBuffer()
       const buffer = Buffer.from(bytes)
-      await writeFile(filePath, buffer)
-
-      imagePath = `/uploads/products/${fileName}`
+      imageDataBase64 = `data:${imageFile.type};base64,${buffer.toString('base64')}`
+      
+      // Usa un URL virtuale per riferimento
+      imagePath = `/api/products/image/${Date.now()}_${imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     }
 
-    // Gestione upload scheda tecnica
+    // Gestione upload scheda tecnica - salva come base64 nel database
     let technicalSheetPath: string | null = null
+    let technicalSheetDataBase64: string | null = null
     if (technicalSheetFile) {
-      // Crea directory se non esiste
-      const uploadDir = join(process.cwd(), 'public', 'uploads', 'technical-sheets')
-      if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true })
-      }
-
       // Verifica tipo file (solo PDF)
       if (technicalSheetFile.type !== 'application/pdf' && !technicalSheetFile.name.endsWith('.pdf')) {
         return NextResponse.json(
@@ -204,18 +186,13 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Genera nome file univoco
-      const timestamp = Date.now()
-      const sanitizedName = technicalSheetFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-      const fileName = `${timestamp}_${sanitizedName}`
-      const filePath = join(uploadDir, fileName)
-
-      // Salva file
+      // Converti PDF in base64
       const bytes = await technicalSheetFile.arrayBuffer()
       const buffer = Buffer.from(bytes)
-      await writeFile(filePath, buffer)
-
-      technicalSheetPath = `/uploads/technical-sheets/${fileName}`
+      technicalSheetDataBase64 = `data:application/pdf;base64,${buffer.toString('base64')}`
+      
+      // Usa un URL virtuale per riferimento
+      technicalSheetPath = `/api/products/technical-sheet/${Date.now()}_${technicalSheetFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     }
 
     // Parse customFields
@@ -240,7 +217,9 @@ export async function POST(request: NextRequest) {
         price,
         vatRate: vatRate || null,
         image: imagePath,
+        imageData: imageDataBase64,
         technicalSheet: technicalSheetPath,
+        technicalSheetData: technicalSheetDataBase64,
         categoryId,
         productTypeId: productTypeId || null,
         brand: brand || null,

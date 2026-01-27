@@ -120,7 +120,9 @@ model Product {
   price             Float
   vatRate           Float? // Aliquota IVA in percentuale (es. 22 per 22%)
   image             String
+  imageData         String? // Immagine come base64 (per salvare nel database)
   technicalSheet    String? // URL o path del file scheda tecnica (PDF)
+  technicalSheetData String? // Scheda tecnica come base64 (per salvare nel database)
   categoryId        String
   productTypeId     String?
   brand             String?
@@ -163,8 +165,11 @@ model ProductImage {
   id           String   @id @default(cuid())
   productId    String
   imageUrl     String // URL immagine originale
+  imageData    String? // Immagine come base64 (per salvare nel database)
   thumbnailUrl String? // URL thumbnail (se generato)
+  thumbnailData String? // Thumbnail come base64 (per salvare nel database)
   webpUrl      String? // URL versione WebP (se convertita)
+  webpData     String? // WebP come base64 (per salvare nel database)
   width        Int? // Larghezza originale
   height       Int? // Altezza originale
   fileSize     Int? // Dimensione file in bytes
