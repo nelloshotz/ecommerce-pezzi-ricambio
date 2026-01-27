@@ -312,15 +312,24 @@ export default function NuovoProdottoPage() {
               Prezzo (€) *
             </label>
             <input
-              type="number"
+              type="text"
               required
-              min="0"
-              step="0.01"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+              value={formData.price > 0 ? formData.price.toFixed(2).replace('.', ',') : ''}
+              onChange={(e) => {
+                // Permette virgola o punto come separatore decimale
+                let value = e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
+                // Rimuove punti multipli o virgole multiple
+                const parts = value.split('.')
+                if (parts.length > 2) {
+                  value = parts[0] + '.' + parts.slice(1).join('')
+                }
+                const numValue = parseFloat(value) || 0
+                setFormData({ ...formData, price: numValue })
+              }}
+              placeholder="0,00"
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />
-            <p className="text-xs text-gray-500 mt-1">Prezzo senza IVA</p>
+            <p className="text-xs text-gray-500 mt-1">Prezzo senza IVA (puoi usare virgola o punto)</p>
           </div>
 
           {/* Aliquota IVA */}
