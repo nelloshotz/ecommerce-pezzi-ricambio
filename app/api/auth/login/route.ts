@@ -150,14 +150,33 @@ export async function POST(request: NextRequest) {
     await recordLoginAttempt(email, ipAddress, true)
 
     // Genera JWT token
+    console.log('[API Login] Generazione token JWT per utente:', {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    })
+    
     const token = generateToken({
       id: user.id,
       email: user.email,
       role: user.role,
     })
+    
+    console.log('[API Login] Token JWT generato:', {
+      tokenLength: token.length,
+      tokenPrefix: token.substring(0, 20) + '...',
+      hasToken: !!token,
+    })
 
     // Prepara risposta (senza passwordHash)
     const { passwordHash, ...userWithoutPassword } = user
+
+    console.log('[API Login] Invio risposta login:', {
+      hasToken: !!token,
+      hasUser: !!userWithoutPassword,
+      userId: userWithoutPassword.id,
+      email: userWithoutPassword.email,
+    })
 
     return NextResponse.json(
       {

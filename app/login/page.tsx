@@ -32,6 +32,16 @@ export default function LoginPage() {
 
       const data = await response.json()
 
+      console.log('[Login Page] Risposta API login:', {
+        ok: response.ok,
+        status: response.status,
+        hasToken: !!data.token,
+        hasUser: !!data.user,
+        tokenLength: data.token?.length,
+        userId: data.user?.id,
+        email: data.user?.email,
+      })
+
       if (!response.ok) {
         let errorMessage = data.error || 'Username o password errati'
         
@@ -43,8 +53,17 @@ export default function LoginPage() {
         throw new Error(errorMessage)
       }
 
-              // Chiama login nello store con i dati utente e il token JWT
-              await login(email, password, data.user, data.token)
+      console.log('[Login Page] Chiamata login nello store:', {
+        hasUser: !!data.user,
+        hasToken: !!data.token,
+        token: data.token ? data.token.substring(0, 30) + '...' : null,
+        userId: data.user?.id,
+      })
+
+      // Chiama login nello store con i dati utente e il token JWT
+      await login(email, password, data.user, data.token)
+      
+      console.log('[Login Page] Login completato nello store')
 
               // Reindirizza alla home
               router.push('/')

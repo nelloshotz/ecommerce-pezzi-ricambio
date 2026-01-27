@@ -28,9 +28,24 @@ export function generateToken(user: Pick<User, 'id' | 'email' | 'role'>): string
     role: user.role,
   }
 
-  return jwt.sign(payload, JWT_SECRET as string, {
+  console.log('[JWT] Generazione token con payload:', {
+    userId: payload.userId,
+    email: payload.email,
+    role: payload.role,
+    expiresIn: JWT_EXPIRES_IN,
+    hasSecret: !!JWT_SECRET,
+  })
+
+  const token = jwt.sign(payload, JWT_SECRET as string, {
     expiresIn: JWT_EXPIRES_IN,
   } as jwt.SignOptions)
+
+  console.log('[JWT] Token generato:', {
+    tokenLength: token.length,
+    tokenPrefix: token.substring(0, 30) + '...',
+  })
+
+  return token
 }
 
 /**

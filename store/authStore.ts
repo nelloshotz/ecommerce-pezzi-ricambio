@@ -59,12 +59,29 @@ export const useAuthStore = create<AuthStore>()(
 
         // Se userData è fornito (da API), usalo direttamente
         if (userData) {
+          console.log('[AuthStore] Login con userData fornito:', {
+            userId: userData.id,
+            email: userData.email,
+            hasToken: !!token,
+            tokenLength: token?.length,
+            tokenPrefix: token ? token.substring(0, 30) + '...' : null,
+          })
+          
           // PRIMA: Pulisci completamente il carrello locale del precedente utente
           await clearCartLocal()
           
           // POI: Salva i dati del nuovo utente e il token (questo triggererà il reload delle pagine)
           const loginTime = Date.now()
+          console.log('[AuthStore] Salvataggio nello store:', {
+            userId: userData.id,
+            email: userData.email,
+            hasToken: !!token,
+            loginTime,
+          })
+          
           set({ user: userData, token: token || null, loginTimestamp: loginTime })
+          
+          console.log('[AuthStore] Token salvato nello store, verifica persistenza localStorage...')
           
           // Attendi che il token sia persistito nel localStorage
           // Il middleware persist di Zustand potrebbe aver bisogno di tempo
@@ -78,6 +95,7 @@ export const useAuthStore = create<AuthStore>()(
                   const parsed = JSON.parse(authStorage)
                   if (parsed?.state?.token === token) {
                     persisted = true
+                    console.log('[AuthStore] Token persistito nel localStorage al tentativo', i + 1)
                     break
                   }
                 } catch (e) {
@@ -86,7 +104,9 @@ export const useAuthStore = create<AuthStore>()(
               }
             }
             if (!persisted) {
-              console.warn('[AuthStore] Token non persistito nel localStorage dopo login')
+              console.warn('[AuthStore] Token non persistito nel localStorage dopo login dopo 50 tentativi')
+            } else {
+              console.log('[AuthStore] Token correttamente persistito nel localStorage')
             }
           }
           
@@ -110,16 +130,33 @@ export const useAuthStore = create<AuthStore>()(
           const data = await response.json()
 
           if (response.ok && data.user) {
+            console.log('[AuthStore] Login riuscito via API:', {
+              userId: data.user.id,
+              email: data.user.email,
+              hasToken: !!data.token,
+              tokenLength: data.token?.length,
+              tokenPrefix: data.token ? data.token.substring(0, 30) + '...' : null,
+            })
+            
             // PRIMA: Pulisci completamente il carrello locale del precedente utente
             await clearCartLocal()
             
             // POI: Salva i dati del nuovo utente e il token JWT (questo triggererà il reload delle pagine)
             const loginTime = Date.now()
+            console.log('[AuthStore] Salvataggio nello store:', {
+              userId: data.user.id,
+              email: data.user.email,
+              hasToken: !!data.token,
+              loginTime,
+            })
+            
             set({ 
               user: data.user, 
               token: data.token || null, // Salva il token JWT
               loginTimestamp: loginTime 
             })
+            
+            console.log('[AuthStore] Token salvato nello store, verifica persistenza localStorage...')
             
             // Attendi che il token sia persistito nel localStorage
             // Il middleware persist di Zustand potrebbe aver bisogno di tempo
@@ -133,6 +170,7 @@ export const useAuthStore = create<AuthStore>()(
                     const parsed = JSON.parse(authStorage)
                     if (parsed?.state?.token === data.token) {
                       persisted = true
+                      console.log('[AuthStore] Token persistito nel localStorage al tentativo', i + 1)
                       break
                     }
                   } catch (e) {
@@ -141,7 +179,9 @@ export const useAuthStore = create<AuthStore>()(
                 }
               }
               if (!persisted) {
-                console.warn('[AuthStore] Token non persistito nel localStorage dopo login')
+                console.warn('[AuthStore] Token non persistito nel localStorage dopo login dopo 50 tentativi')
+              } else {
+                console.log('[AuthStore] Token correttamente persistito nel localStorage')
               }
             }
             
