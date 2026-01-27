@@ -42,9 +42,12 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Decripta la secret key per poterla mostrare/modificare
+    const decryptedSecretKey = config.secretKey ? decryptSecret(config.secretKey) : ''
+    
     // Ritorna configurazione (senza mostrare completamente la secret key per sicurezza)
-    const maskedSecretKey = config.secretKey
-      ? `${config.secretKey.substring(0, 12)}...${config.secretKey.substring(config.secretKey.length - 4)}`
+    const maskedSecretKey = decryptedSecretKey
+      ? `${decryptedSecretKey.substring(0, 12)}...${decryptedSecretKey.substring(decryptedSecretKey.length - 4)}`
       : null
 
     return NextResponse.json({
@@ -52,7 +55,7 @@ export async function GET(request: NextRequest) {
         id: config.id,
         publishableKey: config.publishableKey || '',
         secretKey: maskedSecretKey, // Mostra solo inizio e fine per sicurezza
-        secretKeyFull: config.secretKey || '', // Ritorna anche la chiave completa per modifica
+        secretKeyFull: decryptedSecretKey, // Ritorna la chiave completa decriptata per modifica
         webhookSecret: config.webhookSecret || '',
         isTestMode: config.isTestMode,
         isActive: config.isActive,
