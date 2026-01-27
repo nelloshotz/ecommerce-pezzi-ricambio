@@ -66,6 +66,30 @@ export const useAuthStore = create<AuthStore>()(
           const loginTime = Date.now()
           set({ user: userData, token: token || null, loginTimestamp: loginTime })
           
+          // Attendi che il token sia persistito nel localStorage
+          // Il middleware persist di Zustand potrebbe aver bisogno di tempo
+          if (typeof window !== 'undefined' && token) {
+            let persisted = false
+            for (let i = 0; i < 50; i++) {
+              await new Promise(resolve => setTimeout(resolve, 10))
+              const authStorage = localStorage.getItem('auth-storage')
+              if (authStorage) {
+                try {
+                  const parsed = JSON.parse(authStorage)
+                  if (parsed?.state?.token === token) {
+                    persisted = true
+                    break
+                  }
+                } catch (e) {
+                  // Ignora errori di parsing
+                }
+              }
+            }
+            if (!persisted) {
+              console.warn('[AuthStore] Token non persistito nel localStorage dopo login')
+            }
+          }
+          
           // INFINE: Carica il carrello del nuovo utente dal database
           // Usa un piccolo delay per garantire che lo store sia aggiornato
           setTimeout(() => {
@@ -96,6 +120,30 @@ export const useAuthStore = create<AuthStore>()(
               token: data.token || null, // Salva il token JWT
               loginTimestamp: loginTime 
             })
+            
+            // Attendi che il token sia persistito nel localStorage
+            // Il middleware persist di Zustand potrebbe aver bisogno di tempo
+            if (typeof window !== 'undefined' && data.token) {
+              let persisted = false
+              for (let i = 0; i < 50; i++) {
+                await new Promise(resolve => setTimeout(resolve, 10))
+                const authStorage = localStorage.getItem('auth-storage')
+                if (authStorage) {
+                  try {
+                    const parsed = JSON.parse(authStorage)
+                    if (parsed?.state?.token === data.token) {
+                      persisted = true
+                      break
+                    }
+                  } catch (e) {
+                    // Ignora errori di parsing
+                  }
+                }
+              }
+              if (!persisted) {
+                console.warn('[AuthStore] Token non persistito nel localStorage dopo login')
+              }
+            }
             
             // INFINE: Carica il carrello del nuovo utente dal database
             // Usa un piccolo delay per garantire che lo store sia aggiornato
