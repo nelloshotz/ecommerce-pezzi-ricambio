@@ -179,7 +179,32 @@ export const useCartStore = create<CartStore>()(
       addItem: async (product: Product, quantity = 1, userId?: string) => {
         try {
           // Verifica autenticazione prima di procedere
-          const token = useAuthStore.getState().token
+          // Prova a leggere il token dallo store, con fallback al localStorage
+          let token = useAuthStore.getState().token
+          
+          // Se il token non è nello store, prova a leggerlo direttamente dal localStorage
+          if (!token && typeof window !== 'undefined') {
+            try {
+              const authStorage = localStorage.getItem('auth-storage')
+              if (authStorage) {
+                const parsed = JSON.parse(authStorage)
+                token = parsed?.state?.token || null
+              }
+            } catch (error) {
+              // Ignora errori di parsing
+            }
+          }
+          
+          // Se ancora non c'è token, attendi un po' per la ri-idratazione dello store
+          if (!token && typeof window !== 'undefined') {
+            for (let i = 0; i < 20; i++) {
+              await new Promise(resolve => setTimeout(resolve, 50))
+              token = useAuthStore.getState().token
+              if (token) break
+            }
+          }
+          
+          // Solo se dopo tutti i tentativi non c'è token, reindirizza al login
           if (!token) {
             alert('Errore: Sessione scaduta. Effettua nuovamente il login.')
             // Reindirizza al login se disponibile
