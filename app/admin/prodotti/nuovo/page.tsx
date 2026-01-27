@@ -1,18 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { Product } from '@/types'
 import { FiSave, FiX, FiArrowLeft, FiInfo, FiImage, FiFile, FiXCircle, FiRefreshCw } from 'react-icons/fi'
 import Link from 'next/link'
 import Image from 'next/image'
-import {
-  getAllProductTypes,
-  getProductTypeConfig,
-  getProductTypeCategories,
-  ProductTypeField,
-} from '@/lib/productTypes'
 import { generateProductCode } from '@/lib/productCodeGenerator'
 
 export default function NuovoProdottoPage() {
@@ -25,8 +19,6 @@ export default function NuovoProdottoPage() {
     vatRate: undefined,
     image: '/images/placeholder.svg',
     category: '',
-    productType: '',
-    customFields: {},
     brand: '',
     partNumber: '',
     compatibility: '',
@@ -60,8 +52,6 @@ export default function NuovoProdottoPage() {
     isActive: boolean
   }>>([])
 
-  const productTypes = getAllProductTypes()
-  const categoryNames = getProductTypeCategories() // Nomi categoria per filtrare productTypes
   const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([])
   
   // Carica categorie dal database
@@ -103,145 +93,6 @@ export default function NuovoProdottoPage() {
     }
     loadCategories()
   }, [currentUser?.id])
-  
-  // Filtra i tipi prodotto in base alla categoria selezionata (usa il nome)
-  const selectedCategoryName = categories.find(c => c.id === formData.category)?.name || formData.category
-  const availableProductTypes = useMemo(() => {
-    if (!selectedCategoryName) return productTypes
-    return productTypes.filter((type) => type.category === selectedCategoryName)
-  }, [selectedCategoryName, productTypes])
-
-  // Ottieni la configurazione del tipo prodotto selezionato
-  const selectedProductTypeConfig = formData.productType
-    ? getProductTypeConfig(formData.productType)
-    : null
-
-  // Quando cambia la categoria, resetta il tipo prodotto se non è più disponibile
-  useEffect(() => {
-    if (selectedCategoryName && formData.productType) {
-      const typeStillAvailable = availableProductTypes.some(
-        (type) => type.id === formData.productType
-      )
-      if (!typeStillAvailable) {
-        setFormData({
-          ...formData,
-          productType: '',
-          customFields: {},
-        })
-      }
-    }
-  }, [selectedCategoryName, formData.productType, availableProductTypes])
-
-  // Quando cambia il tipo prodotto, resetta i customFields
-  useEffect(() => {
-    if (formData.productType && selectedProductTypeConfig) {
-      const newCustomFields: Record<string, any> = {}
-      selectedProductTypeConfig.fields.forEach((field) => {
-        if (field.defaultValue !== undefined) {
-          newCustomFields[field.name] = field.defaultValue
-        }
-      })
-      setFormData({
-        ...formData,
-        customFields: newCustomFields,
-      })
-    }
-  }, [formData.productType])
-
-  const handleCustomFieldChange = (fieldName: string, value: any) => {
-    setFormData({
-      ...formData,
-      customFields: {
-        ...formData.customFields,
-        [fieldName]: value,
-      },
-    })
-  }
-
-  const renderField = (field: ProductTypeField) => {
-    const value = formData.customFields?.[field.name] ?? field.defaultValue ?? ''
-
-    switch (field.type) {
-      case 'text':
-        return (
-          <input
-            type="text"
-            required={field.required}
-            value={value as string}
-            onChange={(e) => handleCustomFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            placeholder={field.placeholder}
-          />
-        )
-
-      case 'number':
-        return (
-          <input
-            type="number"
-            required={field.required}
-            value={value as number}
-            onChange={(e) =>
-              handleCustomFieldChange(field.name, parseFloat(e.target.value) || 0)
-            }
-            min={field.validation?.min}
-            max={field.validation?.max}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            placeholder={field.placeholder}
-          />
-        )
-
-      case 'select':
-        return (
-          <select
-            required={field.required}
-            value={value as string}
-            onChange={(e) => handleCustomFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            <option value="">
-              {field.placeholder || 'Seleziona opzione'}
-            </option>
-            {field.options?.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        )
-
-      case 'toggle':
-        // Renderizza come select per semplicità, ma potrebbe essere un radio button
-        return (
-          <select
-            required={field.required}
-            value={value as string}
-            onChange={(e) => handleCustomFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            {field.options?.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        )
-
-      case 'textarea':
-        return (
-          <textarea
-            required={field.required}
-            value={value as string}
-            onChange={(e) => handleCustomFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            rows={4}
-            placeholder={field.placeholder}
-          />
-        )
-
-      default:
-        return null
-    }
-  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -304,7 +155,6 @@ export default function NuovoProdottoPage() {
         formDataToSend.append('vatRate', String(formData.vatRate))
       }
       formDataToSend.append('categoryId', formData.category || '')
-      formDataToSend.append('productTypeId', formData.productType || '')
       formDataToSend.append('brand', formData.brand || '')
       formDataToSend.append('partNumber', formData.partNumber || '')
       formDataToSend.append('compatibility', formData.compatibility || '')
@@ -341,11 +191,6 @@ export default function NuovoProdottoPage() {
       }
       if (formData.weight !== undefined && formData.weight !== null && formData.weight > 0) {
         formDataToSend.append('weight', String(formData.weight))
-      }
-      
-      // Aggiungi customFields come JSON
-      if (formData.customFields) {
-        formDataToSend.append('customFields', JSON.stringify(formData.customFields))
       }
 
       // Aggiungi file se presenti
@@ -677,8 +522,6 @@ export default function NuovoProdottoPage() {
                 setFormData({
                   ...formData,
                   category: e.target.value,
-                  productType: '', // Reset tipo quando cambia categoria
-                  customFields: {},
                 })
               }
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -691,72 +534,6 @@ export default function NuovoProdottoPage() {
               ))}
             </select>
           </div>
-
-          {/* Tipo Prodotto */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tipo Prodotto *
-            </label>
-            <select
-              required
-              value={formData.productType || ''}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  productType: e.target.value,
-                  customFields: {},
-                })
-              }
-              disabled={!formData.category}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
-              <option value="">
-                {formData.category
-                  ? 'Seleziona tipo prodotto'
-                  : 'Seleziona prima una categoria'}
-              </option>
-              {availableProductTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-            {formData.category && !formData.productType && (
-              <div className="mt-2 p-3 bg-blue-50 rounded-lg flex items-start space-x-2">
-                <FiInfo className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-blue-700">
-                  Seleziona un tipo prodotto per mostrare i campi specifici per
-                  questo tipo di pezzo di ricambio.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Campi Dinamici basati sul Tipo Prodotto */}
-          {selectedProductTypeConfig && selectedProductTypeConfig.fields.length > 0 && (
-            <div className="md:col-span-2 border-t pt-6 mt-4">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">
-                Caratteristiche Specifiche - {selectedProductTypeConfig.name}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {selectedProductTypeConfig.fields.map((field) => (
-                  <div key={field.name}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {field.label} {field.required && '*'}
-                    </label>
-                    {renderField(field)}
-                    {field.validation && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {field.validation.min !== undefined &&
-                          field.validation.max !== undefined &&
-                          `Range: ${field.validation.min} - ${field.validation.max}`}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Marca */}
           <div>

@@ -1,17 +1,12 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { Product } from '@/types'
 import { FiSave, FiX, FiArrowLeft, FiPlus, FiMinus, FiInfo, FiImage, FiFile } from 'react-icons/fi'
 import Link from 'next/link'
 import Image from 'next/image'
-import {
-  getAllProductTypes,
-  getProductTypeConfig,
-  ProductTypeField,
-} from '@/lib/productTypes'
 
 export default function ModificaProdottoPage() {
   const params = useParams()
@@ -31,8 +26,6 @@ export default function ModificaProdottoPage() {
     image: '/images/placeholder.svg',
     technicalSheet: undefined,
     categoryId: '',
-    productType: '',
-    customFields: {},
     brand: '',
     partNumber: '',
     compatibility: '',
@@ -68,17 +61,6 @@ export default function ModificaProdottoPage() {
     discountPercent: number
     endDate: string
   } | null>(null)
-
-  const productTypes = getAllProductTypes()
-  const selectedCategoryName = categories.find(c => c.id === formData.categoryId)?.name || ''
-  const availableProductTypes = useMemo(() => {
-    if (!selectedCategoryName) return productTypes
-    return productTypes.filter((type) => type.category === selectedCategoryName)
-  }, [selectedCategoryName, productTypes])
-
-  const selectedProductTypeConfig = formData.productType
-    ? getProductTypeConfig(formData.productType)
-    : null
 
   // Carica categorie
   useEffect(() => {
@@ -149,8 +131,6 @@ export default function ModificaProdottoPage() {
             image: prod.image || '/images/placeholder.svg',
             technicalSheet: prod.technicalSheet,
             categoryId: prod.categoryId || '',
-            productType: prod.productType || prod.productTypeId || '',
-            customFields: prod.customFields || {},
             brand: prod.brand || '',
             partNumber: prod.partNumber || '',
             compatibility: prod.compatibility || '',
@@ -213,91 +193,6 @@ export default function ModificaProdottoPage() {
     }
   }, [productId, currentUser?.id])
 
-  const handleCustomFieldChange = (fieldName: string, value: any) => {
-    setFormData({
-      ...formData,
-      customFields: {
-        ...formData.customFields,
-        [fieldName]: value,
-      },
-    })
-  }
-
-  const renderField = (field: ProductTypeField) => {
-    const value = formData.customFields?.[field.name] ?? field.defaultValue ?? ''
-
-    switch (field.type) {
-      case 'text':
-        return (
-          <input
-            type="text"
-            required={field.required}
-            value={value as string}
-            onChange={(e) => handleCustomFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            placeholder={field.placeholder}
-          />
-        )
-      case 'number':
-        return (
-          <input
-            type="number"
-            required={field.required}
-            value={value as number}
-            onChange={(e) => handleCustomFieldChange(field.name, parseFloat(e.target.value) || 0)}
-            min={field.validation?.min}
-            max={field.validation?.max}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            placeholder={field.placeholder}
-          />
-        )
-      case 'select':
-        return (
-          <select
-            required={field.required}
-            value={value as string}
-            onChange={(e) => handleCustomFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            <option value="">Seleziona...</option>
-            {field.options?.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        )
-      case 'toggle':
-        return (
-          <select
-            required={field.required}
-            value={value as string}
-            onChange={(e) => handleCustomFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            {field.options?.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        )
-      case 'textarea':
-        return (
-          <textarea
-            required={field.required}
-            value={value as string}
-            onChange={(e) => handleCustomFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            rows={3}
-            placeholder={field.placeholder}
-          />
-        )
-      default:
-        return null
-    }
-  }
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -358,7 +253,6 @@ export default function ModificaProdottoPage() {
           formDataToSend.append('vatRate', String(formData.vatRate))
         }
         formDataToSend.append('categoryId', formData.categoryId || '')
-        formDataToSend.append('productTypeId', formData.productType || '')
         formDataToSend.append('brand', formData.brand || '')
         formDataToSend.append('partNumber', formData.partNumber || '')
         formDataToSend.append('compatibility', formData.compatibility || '')
@@ -369,7 +263,6 @@ export default function ModificaProdottoPage() {
         }
         formDataToSend.append('active', String(formData.active))
         formDataToSend.append('featured', String(formData.featured || false))
-        formDataToSend.append('customFields', JSON.stringify(formData.customFields || {}))
 
         if (formData.height) formDataToSend.append('height', String(formData.height))
         if (formData.width) formDataToSend.append('width', String(formData.width))
@@ -395,7 +288,6 @@ export default function ModificaProdottoPage() {
           price: formData.price || 0,
           vatRate: formData.vatRate !== undefined && formData.vatRate !== null ? formData.vatRate : null,
           categoryId: formData.categoryId,
-          productTypeId: formData.productType || null,
           brand: formData.brand || null,
           partNumber: formData.partNumber || null,
           compatibility: formData.compatibility || null,
@@ -404,7 +296,6 @@ export default function ModificaProdottoPage() {
           lowStockThreshold: formData.lowStockThreshold !== undefined && formData.lowStockThreshold !== null ? formData.lowStockThreshold : null,
           active: formData.active,
           featured: formData.featured || false,
-          customFields: formData.customFields || {},
         }
 
         if (formData.height) updateData.height = formData.height
@@ -781,8 +672,6 @@ export default function ModificaProdottoPage() {
                 setFormData({
                   ...formData,
                   categoryId: e.target.value,
-                  productType: '', // Reset tipo quando cambia categoria
-                  customFields: {},
                 })
               }
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -791,36 +680,6 @@ export default function ModificaProdottoPage() {
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Tipo Prodotto */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tipo Prodotto
-            </label>
-            <select
-              value={formData.productType || ''}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  productType: e.target.value,
-                  customFields: {},
-                })
-              }
-              disabled={!formData.categoryId}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
-              <option value="">
-                {formData.categoryId
-                  ? 'Seleziona tipo prodotto'
-                  : 'Seleziona prima una categoria'}
-              </option>
-              {availableProductTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
                 </option>
               ))}
             </select>
@@ -947,25 +806,6 @@ export default function ModificaProdottoPage() {
               </div>
             </div>
           </div>
-
-          {/* Campi Dinamici basati sul Tipo Prodotto */}
-          {selectedProductTypeConfig && selectedProductTypeConfig.fields.length > 0 && (
-            <div className="md:col-span-2 border-t pt-6 mt-4">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">
-                Caratteristiche Specifiche ({selectedProductTypeConfig.name})
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {selectedProductTypeConfig.fields.map((field) => (
-                  <div key={field.name}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {field.label} {field.required && <span className="text-red-500">*</span>}
-                    </label>
-                    {renderField(field)}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Immagine */}
           <div className="md:col-span-2 border-t pt-6 mt-4">
