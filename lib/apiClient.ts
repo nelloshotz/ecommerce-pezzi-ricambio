@@ -33,10 +33,28 @@ export async function authenticatedFetch(
  * Attende che lo store sia ri-idratato se necessario
  */
 export async function getAuthHeaders(): Promise<Record<string, string>> {
+  // Se siamo nel browser, prova a leggere direttamente dal localStorage come fallback
+  if (typeof window !== 'undefined') {
+    try {
+      // Prova a leggere direttamente dal localStorage come fallback
+      const authStorage = localStorage.getItem('auth-storage')
+      if (authStorage) {
+        const parsed = JSON.parse(authStorage)
+        if (parsed?.state?.token) {
+          return {
+            'Authorization': `Bearer ${parsed.state.token}`
+          }
+        }
+      }
+    } catch (error) {
+      // Ignora errori di parsing
+    }
+  }
+
   // Attendi che lo store sia ri-idratato dal localStorage
   // Zustand persist ha bisogno di tempo per ri-idratare lo store dopo il refresh
   let attempts = 0
-  const maxAttempts = 50 // Massimo 500ms di attesa (50 * 10ms)
+  const maxAttempts = 100 // Massimo 1 secondo di attesa (100 * 10ms)
   
   while (attempts < maxAttempts) {
     const token = useAuthStore.getState().token
@@ -56,6 +74,23 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
     } else {
       // Su server-side, non c'è localStorage, quindi esci subito
       break
+    }
+  }
+  
+  // Ultimo tentativo: prova ancora a leggere dal localStorage
+  if (typeof window !== 'undefined') {
+    try {
+      const authStorage = localStorage.getItem('auth-storage')
+      if (authStorage) {
+        const parsed = JSON.parse(authStorage)
+        if (parsed?.state?.token) {
+          return {
+            'Authorization': `Bearer ${parsed.state.token}`
+          }
+        }
+      }
+    } catch (error) {
+      // Ignora errori di parsing
     }
   }
   
