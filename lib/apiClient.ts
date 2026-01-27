@@ -33,13 +33,37 @@ export async function authenticatedFetch(
  * Attende che lo store sia ri-idratato se necessario
  */
 export async function getAuthHeaders(): Promise<Record<string, string>> {
-  // Attendi un breve momento per assicurarsi che lo store sia ri-idratato
-  // Questo è necessario quando la funzione viene chiamata subito dopo il refresh
-  await new Promise(resolve => setTimeout(resolve, 0))
+  // Attendi che lo store sia ri-idratato dal localStorage
+  // Zustand persist ha bisogno di tempo per ri-idratare lo store dopo il refresh
+  let attempts = 0
+  const maxAttempts = 50 // Massimo 500ms di attesa (50 * 10ms)
   
+  while (attempts < maxAttempts) {
+    const token = useAuthStore.getState().token
+    
+    // Se il token è disponibile, possiamo procedere
+    if (token) {
+      const headers: Record<string, string> = {
+        'Authorization': `Bearer ${token}`
+      }
+      return headers
+    }
+    
+    // Se siamo nel browser e lo store non è ancora ri-idratato, attendi
+    if (typeof window !== 'undefined') {
+      await new Promise(resolve => setTimeout(resolve, 10))
+      attempts++
+    } else {
+      // Su server-side, non c'è localStorage, quindi esci subito
+      break
+    }
+  }
+  
+  // Se dopo tutti i tentativi il token non è disponibile, restituisci header vuoto
+  // Il controllo nel cartStore verificherà e reindirizzerà al login
   const token = useAuthStore.getState().token
   const headers: Record<string, string> = {}
-
+  
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
