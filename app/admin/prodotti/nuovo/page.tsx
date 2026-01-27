@@ -338,19 +338,30 @@ export default function NuovoProdottoPage() {
               Aliquota IVA (%)
             </label>
             <input
-              type="number"
-              min="0"
-              max="100"
-              step="0.01"
-              value={formData.vatRate ?? ''}
-              onChange={(e) => setFormData({ ...formData, vatRate: e.target.value ? parseFloat(e.target.value) : undefined })}
+              type="text"
+              value={formData.vatRate !== undefined && formData.vatRate !== null ? formData.vatRate.toString().replace('.', ',') : ''}
+              onChange={(e) => {
+                // Permette virgola o punto come separatore decimale
+                let value = e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
+                // Rimuove punti multipli o virgole multiple
+                const parts = value.split('.')
+                if (parts.length > 2) {
+                  value = parts[0] + '.' + parts.slice(1).join('')
+                }
+                const numValue = value ? parseFloat(value) : undefined
+                // Limita a 100
+                if (numValue !== undefined && numValue > 100) {
+                  return
+                }
+                setFormData({ ...formData, vatRate: numValue })
+              }}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              placeholder="Es. 22 per 22%"
+              placeholder="Es. 22 o 22,5"
             />
             <p className="text-xs text-gray-500 mt-1">
               {formData.vatRate && formData.price && formData.price > 0
                 ? `Prezzo con IVA: €${(((formData.price || 0) * (1 + formData.vatRate / 100))).toFixed(2)}`
-                : 'Lascia vuoto per prezzo senza IVA'}
+                : 'Lascia vuoto per prezzo senza IVA (puoi usare virgola o punto)'}
             </p>
           </div>
 
@@ -360,22 +371,29 @@ export default function NuovoProdottoPage() {
               Quantità Iniziale *
             </label>
             <input
-              type="number"
+              type="text"
               required
-              min="0"
-              value={formData.stockQuantity || 0}
-              onChange={(e) =>
+              value={formData.stockQuantity > 0 ? formData.stockQuantity.toString().replace('.', ',') : ''}
+              onChange={(e) => {
+                // Permette virgola o punto come separatore decimale
+                let value = e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
+                // Rimuove punti multipli o virgole multiple
+                const parts = value.split('.')
+                if (parts.length > 2) {
+                  value = parts[0] + '.' + parts.slice(1).join('')
+                }
+                const numValue = parseFloat(value) || 0
                 setFormData({
                   ...formData,
-                  stockQuantity: parseInt(e.target.value) || 0,
-                  inStock: parseInt(e.target.value) > 0,
+                  stockQuantity: numValue,
+                  inStock: numValue > 0,
                 })
-              }
+              }}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               placeholder="0"
             />
             <p className="text-xs text-gray-500 mt-1">
-              La quantità si aggiorna automaticamente in base alle vendite
+              La quantità si aggiorna automaticamente in base alle vendite (puoi usare virgola o punto)
             </p>
           </div>
 
@@ -385,20 +403,27 @@ export default function NuovoProdottoPage() {
               Soglia Reminder Stock (quantità)
             </label>
             <input
-              type="number"
-              min="0"
-              value={formData.lowStockThreshold ?? ''}
-              onChange={(e) =>
+              type="text"
+              value={formData.lowStockThreshold !== undefined && formData.lowStockThreshold !== null ? formData.lowStockThreshold.toString().replace('.', ',') : ''}
+              onChange={(e) => {
+                // Permette virgola o punto come separatore decimale
+                let value = e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
+                // Rimuove punti multipli o virgole multiple
+                const parts = value.split('.')
+                if (parts.length > 2) {
+                  value = parts[0] + '.' + parts.slice(1).join('')
+                }
+                const numValue = value ? parseFloat(value) : undefined
                 setFormData({
                   ...formData,
-                  lowStockThreshold: e.target.value ? parseInt(e.target.value) : undefined,
+                  lowStockThreshold: numValue,
                 })
-              }
+              }}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              placeholder="Es. 10"
+              placeholder="Es. 10 o 10,5"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Riceverai un reminder quando la quantità scende sotto questa soglia (opzionale)
+              Riceverai un reminder quando la quantità scende sotto questa soglia (opzionale, puoi usare virgola o punto)
             </p>
           </div>
 
