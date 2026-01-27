@@ -147,11 +147,19 @@ export default function NuovoProdottoPage() {
     setLoading(true)
 
     try {
+      // Validazione prezzo prima dell'invio
+      const finalPrice = formData.price && formData.price > 0 ? formData.price : (priceInput ? parseFloat(priceInput.replace(',', '.')) || 0 : 0)
+      if (!finalPrice || finalPrice <= 0) {
+        alert('Il prezzo è obbligatorio e deve essere maggiore di 0')
+        setLoading(false)
+        return
+      }
+
       // Crea FormData per inviare file
       const formDataToSend = new FormData()
       formDataToSend.append('name', formData.name || '')
       formDataToSend.append('description', formData.description || '')
-      formDataToSend.append('price', String(formData.price || 0))
+      formDataToSend.append('price', String(finalPrice))
       if (formData.vatRate !== undefined && formData.vatRate !== null) {
         formDataToSend.append('vatRate', String(formData.vatRate))
       }
@@ -259,6 +267,15 @@ export default function NuovoProdottoPage() {
       // Mostra il messaggio di errore specifico se disponibile
       const errorMessage = error?.message || error?.error || 'Errore nel salvataggio del prodotto. Controlla i campi obbligatori e riprova.'
       alert(`Errore: ${errorMessage}`)
+      // Log dettagliato per debug
+      console.error('Dettagli errore:', {
+        message: error?.message,
+        error: error?.error,
+        stack: error?.stack,
+        price: formData.price,
+        priceInput: priceInput,
+        finalPrice: formData.price && formData.price > 0 ? formData.price : (priceInput ? parseFloat(priceInput.replace(',', '.')) || 0 : 0)
+      })
     } finally {
       setLoading(false)
     }
@@ -340,11 +357,20 @@ export default function NuovoProdottoPage() {
                 setFormData({ ...formData, price: numValue })
               }}
               onBlur={(e) => {
-                // Quando perde il focus, formatta il valore se presente
-                if (formData.price && formData.price > 0) {
-                  setPriceInput(formData.price.toFixed(2).replace('.', ','))
-                } else if (priceInput === '' || priceInput === '-') {
+                // Quando perde il focus, sincronizza e formatta il valore se presente
+                const currentValue = priceInput.trim()
+                if (currentValue && currentValue !== '-') {
+                  const numValue = parseFloat(currentValue.replace(',', '.')) || 0
+                  if (numValue > 0) {
+                    setFormData({ ...formData, price: numValue })
+                    setPriceInput(numValue.toFixed(2).replace('.', ','))
+                  } else {
+                    setPriceInput('')
+                    setFormData({ ...formData, price: 0 })
+                  }
+                } else {
                   setPriceInput('')
+                  setFormData({ ...formData, price: 0 })
                 }
               }}
               placeholder="0,00"
