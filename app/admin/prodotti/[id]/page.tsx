@@ -471,7 +471,8 @@ export default function ModificaProdottoPage() {
                 if (parts.length > 2) {
                   value = parts[0] + '.' + parts.slice(1).join('')
                 }
-                const numValue = parseFloat(value) || 0
+                // Se il campo è vuoto, imposta 0, altrimenti parseFloat
+                const numValue = value === '' || value === '-' ? 0 : (parseFloat(value) || 0)
                 setFormData({ ...formData, price: numValue })
               }}
               placeholder="0,00"
