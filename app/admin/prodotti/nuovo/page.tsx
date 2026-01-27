@@ -174,7 +174,7 @@ export default function NuovoProdottoPage() {
 
       formDataToSend.append('sku', productCode.trim().toUpperCase())
       formDataToSend.append('stockQuantity', String(formData.stockQuantity || 0))
-      if (formData.lowStockThreshold !== undefined && formData.lowStockThreshold !== null) {
+      if (formData.lowStockThreshold !== undefined && formData.lowStockThreshold !== null && formData.lowStockThreshold > 0) {
         formDataToSend.append('lowStockThreshold', String(formData.lowStockThreshold))
       }
       formDataToSend.append('active', String(formData.active || false))

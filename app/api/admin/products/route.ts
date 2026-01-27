@@ -11,18 +11,20 @@ export async function POST(request: NextRequest) {
     
     const name = formData.get('name') as string
     const description = formData.get('description') as string
-    const price = parseFloat(formData.get('price') as string)
+    const priceStr = formData.get('price') as string
+    const price = priceStr && priceStr.trim() !== '' ? parseFloat(priceStr.replace(',', '.')) : 0
     const vatRateStr = formData.get('vatRate') as string | null
-    const vatRate = vatRateStr ? parseFloat(vatRateStr) : null
+    const vatRate = vatRateStr && vatRateStr.trim() !== '' ? parseFloat(vatRateStr.replace(',', '.')) : null
     const categoryId = formData.get('categoryId') as string
     const productTypeId = formData.get('productTypeId') as string | null
     const brand = formData.get('brand') as string | null
     const partNumber = formData.get('partNumber') as string | null
     const compatibility = formData.get('compatibility') as string | null
     const sku = formData.get('sku') as string | null // Codice prodotto univoco (SKU)
-    const stockQuantity = parseInt(formData.get('stockQuantity') as string) || 0
+    const stockQuantityStr = formData.get('stockQuantity') as string
+    const stockQuantity = stockQuantityStr && stockQuantityStr.trim() !== '' ? parseFloat(stockQuantityStr.replace(',', '.')) || 0 : 0
     const lowStockThresholdStr = formData.get('lowStockThreshold') as string | null
-    const lowStockThreshold = lowStockThresholdStr ? parseInt(lowStockThresholdStr) : null
+    const lowStockThreshold = lowStockThresholdStr && lowStockThresholdStr.trim() !== '' ? parseFloat(lowStockThresholdStr.replace(',', '.')) : null
     const active = formData.get('active') === 'true'
     const customFieldsJson = formData.get('customFields') as string | null
     const imageFile = formData.get('image') as File | null
@@ -33,15 +35,15 @@ export async function POST(request: NextRequest) {
     const widthStr = formData.get('width') as string | null
     const depthStr = formData.get('depth') as string | null
     const weightStr = formData.get('weight') as string | null
-    const height = heightStr ? parseFloat(heightStr) : null
-    const width = widthStr ? parseFloat(widthStr) : null
-    const depth = depthStr ? parseFloat(depthStr) : null
-    const weight = weightStr ? parseFloat(weightStr) : null
+    const height = heightStr && heightStr.trim() !== '' ? parseFloat(heightStr.replace(',', '.')) : null
+    const width = widthStr && widthStr.trim() !== '' ? parseFloat(widthStr.replace(',', '.')) : null
+    const depth = depthStr && depthStr.trim() !== '' ? parseFloat(depthStr.replace(',', '.')) : null
+    const weight = weightStr && weightStr.trim() !== '' ? parseFloat(weightStr.replace(',', '.')) : null
 
     // Validazione campi obbligatori
-    if (!name || !description || !price || !categoryId) {
+    if (!name || !description || price === undefined || price === null || isNaN(price) || price <= 0 || !categoryId) {
       return NextResponse.json(
-        { error: 'Nome, descrizione, prezzo e categoria sono obbligatori' },
+        { error: 'Nome, descrizione, prezzo (maggiore di 0) e categoria sono obbligatori' },
         { status: 400 }
       )
     }
