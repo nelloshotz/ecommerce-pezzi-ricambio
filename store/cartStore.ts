@@ -401,7 +401,37 @@ export const useCartStore = create<CartStore>()(
                 // Ignora errori di logging
               }
               
+              // Log dettagliato prima della chiamata API
+              console.log('[CartStore] Tentativo aggiunta al carrello:', {
+                productId: product.id,
+                quantity: totalQuantity,
+                price: finalPrice,
+                userId,
+                hasToken: !!useAuthStore.getState().token,
+                tokenFromStore: useAuthStore.getState().token ? 'presente' : 'mancante',
+              })
+              
+              // Prova a leggere token anche dal localStorage per logging
+              let tokenFromLocalStorage = null
+              if (typeof window !== 'undefined') {
+                try {
+                  const authStorage = localStorage.getItem('auth-storage')
+                  if (authStorage) {
+                    const parsed = JSON.parse(authStorage)
+                    tokenFromLocalStorage = parsed?.state?.token || null
+                  }
+                } catch (e) {
+                  // Ignora
+                }
+              }
+              console.log('[CartStore] Token dal localStorage:', tokenFromLocalStorage ? 'presente' : 'mancante')
+              
               const headers = await getAuthHeaders()
+              console.log('[CartStore] Headers ottenuti:', {
+                hasAuthorization: !!headers['Authorization'],
+                authorizationHeader: headers['Authorization'] ? 'presente' : 'mancante',
+              })
+              
               const response = await fetch('/api/cart', {
                 method: 'POST',
                 headers,
@@ -410,16 +440,44 @@ export const useCartStore = create<CartStore>()(
 
             if (!response.ok) {
               let errorMessage = 'Errore nell\'aggiunta al carrello'
+              let errorData: any = null
               try {
-                const data = await response.json()
-                errorMessage = data.error || errorMessage
+                errorData = await response.json()
+                errorMessage = errorData.error || errorMessage
               } catch (e) {
                 // Se la risposta non è JSON, usa il messaggio di default
                 errorMessage = `Errore HTTP ${response.status}: ${response.statusText}`
               }
-              console.error('Errore aggiunta al carrello:', errorMessage)
+              
+              // Log dettagliato dell'errore
+              console.error('[CartStore] Errore aggiunta al carrello:', {
+                status: response.status,
+                statusText: response.statusText,
+                errorMessage,
+                errorData,
+                headers: Object.fromEntries(response.headers.entries()),
+                requestHeaders: headers,
+                hasToken: !!useAuthStore.getState().token,
+              })
+              
+              // Se l'errore è "Token di autenticazione mancante", reindirizza al login
+              if (errorMessage.includes('Token di autenticazione') || 
+                  errorMessage.includes('autenticazione mancante') ||
+                  errorMessage.includes('non autenticato') ||
+                  response.status === 401) {
+                console.log('[CartStore] Errore di autenticazione rilevato, reindirizzamento al login')
+                alert('Sessione scaduta. Verrai reindirizzato al login.')
+                // NON ripristinare lo stato precedente - mantieni l'item nel carrello locale
+                // così l'utente può vederlo dopo il login
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/login'
+                }
+                return
+              }
+              
+              // Per altri errori, mostra messaggio e ripristina stato
               alert(errorMessage)
-              // Ripristina stato precedente in caso di errore
+              // Ripristina stato precedente in caso di errore (solo per errori non di autenticazione)
               set({ items })
               return
             }
