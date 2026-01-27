@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { CartItem, Product } from '@/types'
+import { useAuthStore } from '@/store/authStore'
 
 interface CartStore {
   items: CartItem[]
@@ -177,6 +178,17 @@ export const useCartStore = create<CartStore>()(
 
       addItem: async (product: Product, quantity = 1, userId?: string) => {
         try {
+          // Verifica autenticazione prima di procedere
+          const token = useAuthStore.getState().token
+          if (!token) {
+            alert('Errore: Sessione scaduta. Effettua nuovamente il login.')
+            // Reindirizza al login se disponibile
+            if (typeof window !== 'undefined') {
+              window.location.href = '/login'
+            }
+            return
+          }
+
           // Validazione input
           if (!product || !product.id) {
             alert('Prodotto non valido')
