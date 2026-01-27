@@ -196,10 +196,31 @@ export const useCartStore = create<CartStore>()(
           }
           
           // Se ancora non c'è token, attendi un po' per la ri-idratazione dello store
+          // Aumenta il tempo di attesa se l'utente è appena stato autenticato
           if (!token && typeof window !== 'undefined') {
-            for (let i = 0; i < 20; i++) {
+            const maxAttempts = 100 // Aumentato a 5 secondi (100 * 50ms)
+            for (let i = 0; i < maxAttempts; i++) {
               await new Promise(resolve => setTimeout(resolve, 50))
               token = useAuthStore.getState().token
+              
+              // Prova anche a leggere dal localStorage ad ogni tentativo
+              if (!token) {
+                try {
+                  const authStorage = localStorage.getItem('auth-storage')
+                  if (authStorage) {
+                    const parsed = JSON.parse(authStorage)
+                    token = parsed?.state?.token || null
+                    if (token) {
+                      // Se trovato nel localStorage, aggiorna lo store
+                      useAuthStore.setState({ token })
+                      break
+                    }
+                  }
+                } catch (e) {
+                  // Ignora errori di parsing
+                }
+              }
+              
               if (token) break
             }
           }
