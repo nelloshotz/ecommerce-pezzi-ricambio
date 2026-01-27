@@ -439,18 +439,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: authResult.user.userId },
-      select: { role: true },
-    })
-
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'admin')) {
-      return NextResponse.json(
-        { error: 'Accesso negato. Solo amministratori.' },
-        { status: 403 }
-      )
-    }
-
     const { id } = params
 
     // Verifica che il prodotto esista
