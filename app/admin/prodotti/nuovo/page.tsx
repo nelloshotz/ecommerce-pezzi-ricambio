@@ -215,7 +215,25 @@ export default function NuovoProdottoPage() {
 
       // Ottieni header di autenticazione
       const { getAuthHeaders } = await import('@/lib/apiClient')
-      const authHeaders = getAuthHeaders()
+      const authHeaders = await getAuthHeaders()
+      
+      // Verifica che il token esista
+      const token = useAuthStore.getState().token
+      if (!token) {
+        alert('Errore: Sessione scaduta. Effettua nuovamente il login.')
+        router.push('/login')
+        setLoading(false)
+        return
+      }
+      
+      // Verifica che l'header Authorization sia presente
+      if (!authHeaders['Authorization']) {
+        console.error('Token JWT mancante nello store. Token:', token)
+        alert('Errore: Token di autenticazione non disponibile. Effettua nuovamente il login.')
+        router.push('/login')
+        setLoading(false)
+        return
+      }
 
       const response = await fetch('/api/admin/products', {
         method: 'POST',

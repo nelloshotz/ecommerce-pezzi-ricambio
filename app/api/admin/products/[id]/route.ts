@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { writeFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
+import { verifyAuth } from '@/lib/auth'
 
 interface RouteParams {
   params: {
@@ -13,22 +14,17 @@ interface RouteParams {
 // GET - Recupera prodotto per ID (admin, include prodotti inattivi)
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    // Verifica autenticazione admin
-    const userId = request.headers.get('x-user-id')
-    if (!userId) {
+    // Verifica autenticazione
+    const authResult = await verifyAuth(request)
+    if (authResult.error || !authResult.user) {
       return NextResponse.json(
-        { error: 'Utente non autenticato' },
+        { error: authResult.error || 'Utente non autenticato' },
         { status: 401 }
       )
     }
 
     // Verifica ruolo admin
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    })
-
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'admin')) {
+    if (authResult.user.role !== 'ADMIN' && authResult.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Accesso negato. Solo amministratori.' },
         { status: 403 }
@@ -111,22 +107,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT - Modifica prodotto (admin)
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    // Verifica autenticazione admin
-    const userId = request.headers.get('x-user-id')
-    if (!userId) {
+    // Verifica autenticazione
+    const authResult = await verifyAuth(request)
+    if (authResult.error || !authResult.user) {
       return NextResponse.json(
-        { error: 'Utente non autenticato' },
+        { error: authResult.error || 'Utente non autenticato' },
         { status: 401 }
       )
     }
 
     // Verifica ruolo admin
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    })
-
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'admin')) {
+    if (authResult.user.role !== 'ADMIN' && authResult.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Accesso negato. Solo amministratori.' },
         { status: 403 }
@@ -431,17 +422,25 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     // Verifica autenticazione admin
-    const userId = request.headers.get('x-user-id')
-    if (!userId) {
+    // Verifica autenticazione
+    const authResult = await verifyAuth(request)
+    if (authResult.error || !authResult.user) {
       return NextResponse.json(
-        { error: 'Utente non autenticato' },
+        { error: authResult.error || 'Utente non autenticato' },
         { status: 401 }
       )
     }
 
     // Verifica ruolo admin
+    if (authResult.user.role !== 'ADMIN' && authResult.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Accesso negato. Solo amministratori.' },
+        { status: 403 }
+      )
+    }
+
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: authResult.user.userId },
       select: { role: true },
     })
 

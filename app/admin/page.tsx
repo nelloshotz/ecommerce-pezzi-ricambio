@@ -31,7 +31,7 @@ export default function AdminDashboard() {
       try {
         setLoading(true)
         const { getAuthHeaders } = await import('@/lib/apiClient')
-        const authHeaders = getAuthHeaders()
+        const authHeaders = await getAuthHeaders()
         
         const [productsResponse, ordersResponse, usersResponse] = await Promise.all([
           fetch('/api/products?includeInactive=true', {

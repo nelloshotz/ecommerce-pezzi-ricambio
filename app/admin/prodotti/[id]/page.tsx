@@ -319,16 +319,27 @@ export default function ModificaProdottoPage() {
         }
       }
 
+      // Ottieni header di autenticazione
+      const { getAuthHeaders } = await import('@/lib/apiClient')
+      const authHeaders = await getAuthHeaders()
+      
+      // Verifica che il token esista
+      const token = useAuthStore.getState().token
+      if (!token) {
+        alert('Errore: Sessione scaduta. Effettua nuovamente il login.')
+        router.push('/login')
+        setSaving(false)
+        return
+      }
+
+      const headers: HeadersInit = { ...authHeaders }
+      if (!hasFiles) {
+        headers['Content-Type'] = 'application/json'
+      }
+
       const response = await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
-        headers: hasFiles
-          ? {
-              'x-user-id': currentUser.id,
-            }
-          : {
-              'Content-Type': 'application/json',
-              'x-user-id': currentUser.id,
-            },
+        headers,
         body: hasFiles && formDataToSend ? formDataToSend : JSON.stringify(updateData),
       })
 
