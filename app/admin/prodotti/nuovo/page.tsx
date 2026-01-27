@@ -323,7 +323,7 @@ export default function NuovoProdottoPage() {
             <input
               type="text"
               required
-              value={formData.price > 0 ? formData.price.toFixed(2).replace('.', ',') : ''}
+              value={formData.price && formData.price > 0 ? formData.price.toFixed(2).replace('.', ',') : ''}
               onChange={(e) => {
                 // Permette virgola o punto come separatore decimale
                 let value = e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
@@ -382,7 +382,7 @@ export default function NuovoProdottoPage() {
             <input
               type="text"
               required
-              value={formData.stockQuantity > 0 ? formData.stockQuantity.toString().replace('.', ',') : ''}
+              value={formData.stockQuantity && formData.stockQuantity > 0 ? formData.stockQuantity.toString().replace('.', ',') : ''}
               onChange={(e) => {
                 // Permette virgola o punto come separatore decimale
                 let value = e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.')
