@@ -32,13 +32,13 @@ export async function authenticatedFetch(
  * Helper per ottenere gli header di autenticazione
  * Attende che lo store sia ri-idratato se necessario
  */
-export async function getAuthHeaders(): Promise<HeadersInit> {
+export async function getAuthHeaders(): Promise<Record<string, string>> {
   // Attendi un breve momento per assicurarsi che lo store sia ri-idratato
   // Questo è necessario quando la funzione viene chiamata subito dopo il refresh
   await new Promise(resolve => setTimeout(resolve, 0))
   
   const token = useAuthStore.getState().token
-  const headers: HeadersInit = {}
+  const headers: Record<string, string> = {}
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`

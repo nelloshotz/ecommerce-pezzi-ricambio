@@ -227,7 +227,7 @@ export default function NuovoProdottoPage() {
       }
       
       // Verifica che l'header Authorization sia presente
-      if (!authHeaders.get('Authorization')) {
+      if (!authHeaders['Authorization']) {
         console.error('Token JWT mancante nello store. Token:', token)
         alert('Errore: Token di autenticazione non disponibile. Effettua nuovamente il login.')
         router.push('/login')
