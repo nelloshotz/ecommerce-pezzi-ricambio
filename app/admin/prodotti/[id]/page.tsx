@@ -332,9 +332,9 @@ export default function ModificaProdottoPage() {
         return
       }
 
-      const headers: HeadersInit = { ...authHeaders }
-      if (!hasFiles) {
-        headers['Content-Type'] = 'application/json'
+      const headers: HeadersInit = { 
+        ...authHeaders,
+        ...(!hasFiles ? { 'Content-Type': 'application/json' } : {})
       }
 
       const response = await fetch(`/api/admin/products/${productId}`, {
