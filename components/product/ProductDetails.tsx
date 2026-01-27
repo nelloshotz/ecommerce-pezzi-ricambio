@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { Product } from '@/types'
 import { useCartStore } from '@/store/cartStore'
 import { useAuthStore } from '@/store/authStore'
-import { FiShoppingCart, FiTag, FiPackage } from 'react-icons/fi'
+import { FiShoppingCart, FiTag, FiPackage, FiArrowLeft } from 'react-icons/fi'
 
 interface ProductDetailsProps {
   product: Product
@@ -54,6 +54,13 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <button
+        onClick={() => router.back()}
+        className="mb-6 flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <FiArrowLeft className="w-5 h-5 mr-2" />
+        <span>Torna indietro</span>
+      </button>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="relative h-96 bg-gray-200 rounded-lg overflow-hidden">
           <Image
