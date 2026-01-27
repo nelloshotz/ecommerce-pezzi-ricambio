@@ -77,8 +77,9 @@ export const useCartStore = create<CartStore>()(
           // INFINE: Carica il carrello dal database (specifico per questo userId)
           // Il database è la fonte di verità per ogni utente
           const { getAuthHeaders } = await import('@/lib/apiClient')
+          const headers = await getAuthHeaders()
           const response = await fetch('/api/cart', {
-            headers: getAuthHeaders(),
+            headers,
             cache: 'no-store', // Non usare cache per avere sempre dati aggiornati
           })
 
