@@ -32,12 +32,13 @@ export default function LoginPage() {
 
       const data = await response.json()
 
-      console.log('[Login Page] Risposta API login:', {
+      console.log('🔐 [Login Page] Risposta API login ricevuta:', {
         ok: response.ok,
         status: response.status,
         hasToken: !!data.token,
         hasUser: !!data.user,
         tokenLength: data.token?.length,
+        tokenPrefix: data.token ? data.token.substring(0, 30) + '...' : null,
         userId: data.user?.id,
         email: data.user?.email,
       })
@@ -53,7 +54,17 @@ export default function LoginPage() {
         throw new Error(errorMessage)
       }
 
-      console.log('[Login Page] Chiamata login nello store:', {
+      console.log('✅ [Login Page] Login riuscito! Token JWT ricevuto dall\'API')
+      console.log('📦 [Login Page] Dati ricevuti:', {
+        userId: data.user?.id,
+        email: data.user?.email,
+        role: data.user?.role,
+        tokenLength: data.token?.length,
+        tokenPrefix: data.token ? data.token.substring(0, 30) + '...' : null,
+      })
+
+      console.log('💾 [Login Page] Chiamata login nello store per creare la sessione...')
+      console.log('[Login Page] Dati passati allo store:', {
         hasUser: !!data.user,
         hasToken: !!data.token,
         token: data.token ? data.token.substring(0, 30) + '...' : null,
@@ -63,7 +74,7 @@ export default function LoginPage() {
       // Chiama login nello store con i dati utente e il token JWT
       await login(email, password, data.user, data.token)
       
-      console.log('[Login Page] Login completato nello store')
+      console.log('✅ [Login Page] Sessione creata nello store! Login completato.')
 
               // Reindirizza alla home
               router.push('/')
