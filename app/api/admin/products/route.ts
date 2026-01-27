@@ -41,9 +41,27 @@ export async function POST(request: NextRequest) {
     const weight = weightStr && weightStr.trim() !== '' ? parseFloat(weightStr.replace(',', '.')) : null
 
     // Validazione campi obbligatori
-    if (!name || !description || price === undefined || price === null || isNaN(price) || price <= 0 || !categoryId) {
+    if (!name || name.trim() === '') {
       return NextResponse.json(
-        { error: 'Nome, descrizione, prezzo (maggiore di 0) e categoria sono obbligatori' },
+        { error: 'Il nome del prodotto è obbligatorio' },
+        { status: 400 }
+      )
+    }
+    if (!description || description.trim() === '') {
+      return NextResponse.json(
+        { error: 'La descrizione del prodotto è obbligatoria' },
+        { status: 400 }
+      )
+    }
+    if (price === undefined || price === null || isNaN(price) || price <= 0) {
+      return NextResponse.json(
+        { error: 'Il prezzo è obbligatorio e deve essere maggiore di 0' },
+        { status: 400 }
+      )
+    }
+    if (!categoryId || categoryId.trim() === '') {
+      return NextResponse.json(
+        { error: 'La categoria è obbligatoria' },
         { status: 400 }
       )
     }

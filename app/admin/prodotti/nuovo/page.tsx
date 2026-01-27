@@ -210,8 +210,15 @@ export default function NuovoProdottoPage() {
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Errore nel salvataggio del prodotto')
+        let errorMessage = 'Errore nel salvataggio del prodotto'
+        try {
+          const data = await response.json()
+          errorMessage = data.error || `Errore ${response.status}: ${response.statusText}`
+        } catch (parseError) {
+          // Se la risposta non è JSON, usa il testo della risposta o lo status
+          errorMessage = `Errore ${response.status}: ${response.statusText || 'Errore sconosciuto'}`
+        }
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
@@ -248,7 +255,9 @@ export default function NuovoProdottoPage() {
       router.push('/admin/prodotti')
     } catch (error: any) {
       console.error('Errore nel salvataggio:', error)
-      alert(error.message || 'Errore nel salvataggio del prodotto')
+      // Mostra il messaggio di errore specifico se disponibile
+      const errorMessage = error?.message || error?.error || 'Errore nel salvataggio del prodotto. Controlla i campi obbligatori e riprova.'
+      alert(`Errore: ${errorMessage}`)
     } finally {
       setLoading(false)
     }
