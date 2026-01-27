@@ -332,8 +332,8 @@ export default function ModificaProdottoPage() {
         return
       }
 
-      const headers: HeadersInit = { 
-        ...authHeaders,
+      const headers: Record<string, string> = { 
+        ...authHeaders as Record<string, string>,
         ...(!hasFiles ? { 'Content-Type': 'application/json' } : {})
       }
 
