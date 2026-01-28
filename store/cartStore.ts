@@ -449,9 +449,21 @@ export const useCartStore = create<CartStore>()(
               
               const headers = await getAuthHeaders()
               console.log('[CartStore] Headers ottenuti:', {
+                headersObject: headers,
                 hasAuthorization: !!headers['Authorization'],
-                authorizationHeader: headers['Authorization'] ? 'presente' : 'mancante',
+                authorizationHeader: headers['Authorization'] ? headers['Authorization'].substring(0, 30) + '...' : 'mancante',
+                allKeys: Object.keys(headers),
+                authorizationValue: headers['Authorization'],
               })
+              
+              // Verifica che l'header Authorization sia presente
+              if (!headers['Authorization']) {
+                console.error('[CartStore] ⚠️ ERRORE: Header Authorization mancante!', {
+                  headers,
+                  tokenFromStore: useAuthStore.getState().token,
+                  localStorageCheck: typeof window !== 'undefined' ? localStorage.getItem('auth-storage') : null,
+                })
+              }
               
               const response = await fetch('/api/cart', {
                 method: 'POST',
