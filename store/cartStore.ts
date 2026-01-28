@@ -454,6 +454,8 @@ export const useCartStore = create<CartStore>()(
                 authorizationHeader: headers['Authorization'] ? headers['Authorization'].substring(0, 30) + '...' : 'mancante',
                 allKeys: Object.keys(headers),
                 authorizationValue: headers['Authorization'],
+                headersType: typeof headers,
+                headersIsArray: Array.isArray(headers),
               })
               
               // Verifica che l'header Authorization sia presente
@@ -463,11 +465,37 @@ export const useCartStore = create<CartStore>()(
                   tokenFromStore: useAuthStore.getState().token,
                   localStorageCheck: typeof window !== 'undefined' ? localStorage.getItem('auth-storage') : null,
                 })
+                
+                // Prova a recuperare il token direttamente e creare l'header manualmente
+                let manualToken = useAuthStore.getState().token
+                if (!manualToken && typeof window !== 'undefined') {
+                  try {
+                    const authStorage = localStorage.getItem('auth-storage')
+                    if (authStorage) {
+                      const parsed = JSON.parse(authStorage)
+                      manualToken = parsed?.state?.token || null
+                    }
+                  } catch (e) {
+                    // Ignora
+                  }
+                }
+                
+                if (manualToken) {
+                  console.log('[CartStore] 🔧 Riparazione: creazione header manuale con token trovato')
+                  headers['Authorization'] = `Bearer ${manualToken}`
+                  console.log('[CartStore] Header riparato:', {
+                    hasAuthorization: !!headers['Authorization'],
+                    authorizationHeader: headers['Authorization'].substring(0, 30) + '...',
+                  })
+                }
               }
               
               const response = await fetch('/api/cart', {
                 method: 'POST',
-                headers,
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...headers,
+                },
                 body: JSON.stringify(requestBody),
               })
 
